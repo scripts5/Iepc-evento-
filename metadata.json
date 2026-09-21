@@ -1,0 +1,6 @@
+{
+  "name": "Sistema de Gestão de Inscrições em Eventos",
+  "description": "Sistema completo para landing page de evento, formulário de inscrição, emissão de comprovante e QR Code, consulta de inscrição, credenciamento/check-in com câmera/código, certificados de participação personalizáveis em PDF, mini crachás e painel administrativo com senha iepc.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
