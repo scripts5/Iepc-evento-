@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { EventConfig } from '../types/index.ts';
 import { api } from '../services/api.ts';
+import { defaultEventData } from '../data/defaultEvent.ts';
 
 interface EventContextType {
-  event: (EventConfig & { registeredCount: number; isCapacityFull: boolean }) | null;
+  event: EventConfig & { registeredCount: number; isCapacityFull: boolean };
   loading: boolean;
   error: string | null;
   refreshEvent: () => Promise<void>;
@@ -13,22 +14,28 @@ interface EventContextType {
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
 export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [event, setEvent] = useState<(EventConfig & { registeredCount: number; isCapacityFull: boolean }) | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Always initialize with defaultEventData so UI is never blocked by "evento temporariamente indisponível"
+  const [event, setEvent] = useState<EventConfig & { registeredCount: number; isCapacityFull: boolean }>(defaultEventData);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshEvent = async () => {
+  const refreshEvent = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await api.getPublicEvent();
-      setEvent(data);
+      if (data && data.name) {
+        setEvent(data);
+      }
     } catch (err: any) {
-      setError(err.message || 'Falha ao carregar dados do evento.');
+      console.warn('Could not refresh event from API, using cached/default event data:', err);
+      setError(err.message || 'Falha ao sincronizar dados em tempo real.');
+      // Keep event as defaultEventData or existing event, NEVER null
+      setEvent(prev => prev || defaultEventData);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const updateEvent = async (data: Partial<EventConfig>) => {
     await api.updateEventConfig(data);
@@ -37,7 +44,7 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     refreshEvent();
-  }, []);
+  }, [refreshEvent]);
 
   return (
     <EventContext.Provider value={{ event, loading, error, refreshEvent, updateEvent }}>

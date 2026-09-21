@@ -34,8 +34,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(me);
       localStorage.setItem('eventpass_admin_user', JSON.stringify(me));
     } catch {
-      api.adminLogout();
-      setUser(null);
+      const saved = localStorage.getItem('eventpass_admin_user');
+      if (saved) {
+        try {
+          setUser(JSON.parse(saved));
+        } catch {
+          api.adminLogout();
+          setUser(null);
+        }
+      } else {
+        api.adminLogout();
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, CheckCircle, Ticket, Menu, X, Shield, ArrowRight, Award } from 'lucide-react';
 import { useEvent } from '../../context/EventContext.tsx';
+import { defaultEventData } from '../../data/defaultEvent.ts';
 
 interface NavbarProps {
   currentPath: string;
@@ -9,9 +10,10 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
   const { event } = useEvent();
+  const activeEvent = event || defaultEventData;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isRegistrationClosed = event ? !event.isRegistrationOpen || event.isCapacityFull : false;
+  const isRegistrationClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
 
   const handleNav = (target: string) => {
     setMobileMenuOpen(false);
@@ -46,10 +48,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             </div>
             <div>
               <span className="text-base sm:text-lg font-bold text-slate-900 leading-tight block line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                {event?.name || 'Gestão de Inscrições'}
+                {activeEvent.name}
               </span>
               <span className="text-xs font-medium text-slate-500 block">
-                {event ? `${event.startDate.split('-').reverse().join('/')} • ${event.locationName.split(' ')[0]}` : 'Sistema de Inscrições'}
+                {`${activeEvent.startDate.split('-').reverse().join('/')} • ${activeEvent.locationName.split(' ')[0]}`}
               </span>
             </div>
           </button>

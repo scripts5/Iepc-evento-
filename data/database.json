@@ -147,8 +147,8 @@
       "name": "Administrador IEPC",
       "email": "admin@iepc.com",
       "role": "ADMIN",
-      "passwordHash": "af7694cb8f3f15ffc113f9aca17700e20107d3f1361b28d5fc909fcf006131b5c3255e02152d1ca751ea9cc3e42824a9124778a49fec6ad0646ae781bec8c08f",
-      "salt": "1d05a8e0f1bf655291d1eba67b1f8e2d",
+      "passwordHash": "fdbb6565b70cfd810a2766edd629594204db2dc6a9cb1193a908621b4303eacc371115c0600abe0d141406bbee4115c43c446d5961368f3f243d9ea2ec8624b5",
+      "salt": "63174e3a28dffa75dfc330e9848def7a",
       "createdAt": "2026-09-20T12:00:00.000Z"
     },
     {
@@ -159,6 +159,24 @@
       "passwordHash": "1a57e3f890c29f4544b67ecbc3fe755a5b561cceb9f2910a30bbf9ecb7858bfcfc24d9c490a0715372ca62635a8f4c2c510ebf63f350c76ad1a7e2b178491c69",
       "salt": "9c12b7f59e742183c5188f619ebf4640",
       "createdAt": "2026-09-20T12:00:00.000Z"
+    },
+    {
+      "id": "usr-admin-1790000177755",
+      "name": "Administrador IEPC",
+      "email": "kowalski.madagascar123@gmail.com",
+      "role": "ADMIN",
+      "passwordHash": "2ffb4bc8bb9df7d2c88cd1ac797bece8fe3ab6cf2c1483f59586f8c37d1a0a60f42ec04a6fbe786dd6b8df6a4706fa14371bdf0af3c6da75651d15281e1a137f",
+      "salt": "390ce0c776578141365ec6bd78bb81c0",
+      "createdAt": "2026-09-21T14:16:17.755Z"
+    },
+    {
+      "id": "usr-admin-1790000183549",
+      "name": "Administrador IEPC",
+      "email": "administrador.jovens@gmail.com",
+      "role": "ADMIN",
+      "passwordHash": "a7fef461d4f8ed5962f1b7ee62430abe0072127ae8d7cb38fd62644f32703756f6a63206e5a0dc7f098e34f26528590ef59c856b061c0937162719fe95a2e0b6",
+      "salt": "6a43e88a1e7808acdb3826a7d0a8b6b0",
+      "createdAt": "2026-09-21T14:16:23.549Z"
     }
   ],
   "registrations": [

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, ShieldCheck, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import { useEvent } from '../../context/EventContext.tsx';
+import { defaultEventData } from '../../data/defaultEvent.ts';
 
 interface FooterProps {
   onNavigate: (path: string) => void;
@@ -8,6 +9,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const { event } = useEvent();
+  const activeEvent = event || defaultEventData;
 
   return (
     <footer className="bg-slate-950 text-slate-400 border-t border-slate-900 pt-16 pb-12">
@@ -20,7 +22,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <Calendar className="w-5 h-5" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                {event?.name || 'Gestão de Eventos'}
+                {activeEvent.name}
               </span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">

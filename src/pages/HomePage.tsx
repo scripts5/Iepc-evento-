@@ -19,39 +19,22 @@ import {
   Info
 } from 'lucide-react';
 import { useEvent } from '../context/EventContext.tsx';
+import { defaultEventData } from '../data/defaultEvent.ts';
 
 interface HomePageProps {
   onNavigate: (path: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
-  const { event, loading } = useEvent();
+  const { event, loading, refreshEvent } = useEvent();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  if (loading) {
-    return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-slate-500">Carregando informações do evento...</p>
-      </div>
-    );
-  }
+  // Use event from context or safe fallback defaultEventData
+  const activeEvent = event || defaultEventData;
 
-  if (!event) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-rose-500 mb-3" />
-        <h2 className="text-xl font-bold text-slate-900">Evento temporariamente indisponível</h2>
-        <p className="text-sm text-slate-500 max-w-md mt-1">
-          Não foi possível carregar as informações do evento. Por favor, tente novamente mais tarde.
-        </p>
-      </div>
-    );
-  }
-
-  const isClosed = !event.isRegistrationOpen || event.isCapacityFull;
-  const registeredCount = event.registeredCount || 0;
-  const maxCap = event.maxCapacity || 500;
+  const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
+  const registeredCount = activeEvent.registeredCount || 0;
+  const maxCap = activeEvent.maxCapacity || 500;
   const pctFilled = Math.min(100, Math.round((registeredCount / maxCap) * 100));
 
   const formatDate = (dateStr: string) => {
@@ -89,12 +72,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               {/* Title */}
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
-                {event.name}
+                {activeEvent.name}
               </h1>
 
               {/* Tagline */}
               <p className="text-lg sm:text-xl text-slate-600 leading-relaxed font-normal">
-                {event.tagline}
+                {activeEvent.tagline}
               </p>
 
               {/* Event Key Highlights */}
@@ -108,8 +91,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       Data
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-800">
-                      {formatDate(event.startDate)}
-                      {event.endDate && event.endDate !== event.startDate ? ` a ${formatDate(event.endDate)}` : ''}
+                      {formatDate(activeEvent.startDate)}
+                      {activeEvent.endDate && activeEvent.endDate !== activeEvent.startDate ? ` a ${formatDate(activeEvent.endDate)}` : ''}
                     </span>
                   </div>
                 </div>
@@ -123,7 +106,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       Horário
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-800">
-                      {event.time}
+                      {activeEvent.time}
                     </span>
                   </div>
                 </div>
@@ -136,8 +119,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                       Local
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 truncate block" title={event.locationName}>
-                      {event.locationName}
+                    <span className="text-xs sm:text-sm font-bold text-slate-800 truncate block" title={activeEvent.locationName}>
+                      {activeEvent.locationName}
                     </span>
                   </div>
                 </div>
@@ -207,8 +190,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             >
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-900 group">
                 <img
-                  src={event.bannerUrl}
-                  alt={event.name}
+                  src={activeEvent.bannerUrl}
+                  alt={activeEvent.name}
                   className="w-full h-80 sm:h-96 object-cover opacity-85 group-hover:scale-105 transition-transform duration-700"
                   referrerPolicy="no-referrer"
                 />
@@ -240,7 +223,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               Uma experiência imersiva e transformadora
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
-              {event.description}
+              {activeEvent.description}
             </p>
 
             {/* Ticket Types Cards */}
@@ -249,7 +232,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 Categorias de Inscrição Disponíveis
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {event.ticketTypes.map((ticket) => (
+                {activeEvent.ticketTypes.map((ticket) => (
                   <div
                     key={ticket.id}
                     className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-indigo-300 transition-colors"
@@ -280,7 +263,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </div>
 
               <div className="text-xs sm:text-sm text-amber-900/90 leading-relaxed whitespace-pre-line space-y-3">
-                <p>{event.importantInfo}</p>
+                <p>{activeEvent.importantInfo}</p>
                 <div className="pt-3 border-t border-amber-200/80 space-y-2 text-xs">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -316,7 +299,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-4">
-          {event.schedule.map((item, index) => (
+          {activeEvent.schedule.map((item, index) => (
             <div
               key={item.id || index}
               className="bg-white border border-slate-200/80 hover:border-indigo-300 rounded-2xl p-5 sm:p-6 transition-all shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
@@ -369,7 +352,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="space-y-3">
-          {(event.faq || event.faqs || []).map((item, index) => {
+          {(activeEvent.faq || activeEvent.faqs || []).map((item, index) => {
             const isOpen = openFaqIndex === index;
             return (
               <div
@@ -418,27 +401,27 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </p>
 
               <div className="space-y-3 text-sm">
-                {event.contact.email && (
+                {activeEvent.contact.email && (
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-slate-800 text-indigo-400">
                       <Mail className="w-4 h-4" />
                     </div>
-                    <span>{event.contact.email}</span>
+                    <span>{activeEvent.contact.email}</span>
                   </div>
                 )}
-                {event.contact.phone && (
+                {activeEvent.contact.phone && (
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-xl bg-slate-800 text-indigo-400">
                       <MessageCircle className="w-4 h-4" />
                     </div>
-                    <span>Telefone da Igreja: {event.contact.phone}</span>
+                    <span>Telefone da Igreja: {activeEvent.contact.phone}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-slate-800 text-indigo-400">
                     <MapPin className="w-4 h-4" />
                   </div>
-                  <span>{event.locationAddress}</span>
+                  <span>{activeEvent.locationAddress}</span>
                 </div>
               </div>
             </div>
@@ -450,7 +433,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">{event.locationName}</h3>
+                  <h3 className="text-base font-bold text-white">{activeEvent.locationName}</h3>
                   <p className="text-xs text-slate-300">Local de realização oficial</p>
                 </div>
               </div>
@@ -459,7 +442,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </p>
               <div className="pt-2">
                 <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(event.locationAddress || event.locationName || 'Evento')}`}
+                  href={`https://maps.google.com/?q=${encodeURIComponent(activeEvent.locationAddress || activeEvent.locationName || 'Evento')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-colors"

@@ -18,6 +18,7 @@ import { useEvent } from '../context/EventContext.tsx';
 import { useToast } from '../context/ToastContext.tsx';
 import { api } from '../services/api.ts';
 import { Registration } from '../types/index.ts';
+import { defaultEventData } from '../data/defaultEvent.ts';
 
 interface RegistrationPageProps {
   onNavigate: (path: string) => void;
@@ -32,6 +33,7 @@ const BRAZILIAN_STATES = [
 
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, onSuccess }) => {
   const { event, loading, refreshEvent } = useEvent();
+  const activeEvent = event || defaultEventData;
   const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -46,7 +48,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     city: '',
     state: 'SP',
     organization: '',
-    ticketType: event?.ticketTypes[0]?.id || 'jovem-iepc',
+    ticketType: activeEvent.ticketTypes[0]?.id || 'jovem-iepc',
     notes: '',
     termsAccepted: false,
   });
@@ -70,18 +72,18 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
 
   // Sync ticketType whenever event finishes loading
   useEffect(() => {
-    if (event?.ticketTypes && event.ticketTypes.length > 0) {
+    if (activeEvent?.ticketTypes && activeEvent.ticketTypes.length > 0) {
       setFormData(prev => {
-        const hasMatch = event.ticketTypes.some(t => t.id === prev.ticketType);
+        const hasMatch = activeEvent.ticketTypes.some(t => t.id === prev.ticketType);
         if (!hasMatch) {
-          return { ...prev, ticketType: event.ticketTypes[0].id };
+          return { ...prev, ticketType: activeEvent.ticketTypes[0].id };
         }
         return prev;
       });
     }
-  }, [event]);
+  }, [activeEvent]);
 
-  const isClosed = event ? !event.isRegistrationOpen || event.isCapacityFull : false;
+  const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
 
   // Phone auto mask helper (optional field)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,15 +169,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
       setSubmitting(false);
     }
   };
-
-  if (loading && !event) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-base font-semibold text-slate-700">Carregando formulário de inscrição da IEPC...</p>
-      </div>
-    );
-  }
 
   if (isClosed) {
     return (
@@ -495,7 +488,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {event?.ticketTypes.map((ticket) => {
+              {activeEvent.ticketTypes.map((ticket) => {
                 const isSelected = formData.ticketType === ticket.id;
                 return (
                   <label

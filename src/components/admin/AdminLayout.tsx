@@ -161,7 +161,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPath, onNavigat
               {user?.role || 'STAFF'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
+          <p className="text-[11px] text-slate-400 truncate">
+            {user?.email && !user.email.includes('admin@iepc.com') ? user.email : 'Gmail Administrativo'}
+          </p>
 
           <button
             type="button"
