@@ -15,6 +15,7 @@ import {
   Sparkles,
   CheckCircle2,
   Award,
+  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useToast } from '../../context/ToastContext.tsx';
@@ -46,8 +47,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPath, onNavigat
   const navItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Lista de Inscritos', path: '/admin/inscritos', icon: Users },
+    { label: 'Crachás de Identificação', path: '/admin/crachas', icon: CreditCard },
     { label: 'Check-in (Credenciamento)', path: '/admin/checkin', icon: QrCode },
-    { label: 'Certificados & Crachás', path: '/admin/certificados', icon: Award },
+    { label: 'Certificados Digitais', path: '/admin/certificados', icon: Award },
     { label: 'Relatórios & Exportação', path: '/admin/relatorios', icon: FileBarChart },
     ...(isAdmin
       ? [
