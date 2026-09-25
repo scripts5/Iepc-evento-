@@ -90,9 +90,7 @@ export const VoucherModal: React.FC<VoucherModalProps> = ({
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
                   <span>
-                    {event?.startDate?.includes('2026-11')
-                      ? 'Novembro / 2026 (Dia a definir) • Horário não definido'
-                      : (event ? `${event.startDate.split('-').reverse().join('/')} • ${event.time && event.time !== '19h00 às 22h00' ? event.time : 'Horário não definido'}` : 'Novembro / 2026 • Horário não definido')}
+                    21/11/2026 (Sábado) • A partir das 08h (Café) • Dia todo
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

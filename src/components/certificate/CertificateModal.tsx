@@ -87,8 +87,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   const eventName = safeEvent.name || 'Evento dos Jovens IEPC 2026';
   
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Mês de Novembro / 2026 (Dia a definir)';
-    if (dateStr.includes('2026-11')) return 'Mês de Novembro / 2026 (Dia a definir)';
+    if (!dateStr) return '21 de Novembro de 2026';
+    if (dateStr === '2026-11-21' || dateStr.includes('2026-11-21')) return '21 de Novembro de 2026';
     const parts = dateStr.split('-');
     if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
     return dateStr;

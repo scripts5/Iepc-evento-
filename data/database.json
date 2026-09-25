@@ -4,10 +4,10 @@
     "name": "Evento dos Jovens IEPC 2026",
     "tagline": "Juventude com Propósito • Avivamento, Adoração, Fé e Comunhão",
     "description": "O grande Encontro de Jovens da Igreja Evangélica Pentecostal Cristã (IEPC) reunirá a juventude e adolescentes para momentos marcantes na presença de Deus. Teremos louvor ao vivo com o Ministério de Louvor Jovem IEPC, ministração bíblica direcionada para a vida dos jovens, testemunhos, oração especial no altar, dinâmicas de acolhimento e confraternização. Um ambiente caloroso e transformador aberto a todos os membros e visitantes.",
-    "importantInfo": "Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no mês de Novembro de 2026 (dia exato a ser anunciado nos cultos e atualizado aqui no site). Traga sua Bíblia, venha com coração aberto e convide seus amigos!",
-    "startDate": "2026-11-01",
-    "endDate": "2026-11-30",
-    "time": "Horário não definido",
+    "importantInfo": "Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no dia 21 de Novembro de 2026 (sábado), com início às 8h da manhã com um delicioso café da manhã para todos e programação abençoada durante o dia inteiro. Traga sua Bíblia, venha com coração aberto e convide seus amigos!",
+    "startDate": "2026-11-21",
+    "endDate": "2026-11-21",
+    "time": "A partir das 08h00 (Café da Manhã) • O dia todo",
     "locationName": "Igreja Evangélica Pentecostal Cristã (IEPC) - Templo Sede",
     "locationAddress": "Templo Sede da IEPC - Auditório Central dos Jovens",
     "bannerUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80",
@@ -39,51 +39,67 @@
     "schedule": [
       {
         "id": "sch-1",
-        "time": "18h30 - 19h00",
-        "title": "Recepção, Acolhimento & Entrega de Crachás",
+        "time": "08h00 - 09h00",
+        "title": "Café da Manhã & Recepção de Boas-Vindas",
         "speaker": "Equipe de Acolhimento Jovem IEPC",
-        "description": "Chegada da juventude, credenciamento ágil com QR Code ou nome completo e entrega do mini crachá.",
-        "location": "Hall de Entrada do Templo"
+        "description": "Acolhimento da juventude, credenciamento com QR Code, entrega dos mini crachás e café da manhã especial para começar o dia juntos.",
+        "location": "Salão de Convivência & Hall do Templo"
       },
       {
         "id": "sch-2",
-        "time": "19h00 - 19h30",
-        "title": "Abertura com Oração & Dinâmica de Boas-Vindas",
+        "time": "09h00 - 09h45",
+        "title": "Abertura Oficial, Oração & Louvor Inicial",
         "speaker": "Liderança da Juventude IEPC",
-        "description": "Oração inicial consagrando o evento e dinâmica alegre de integração e quebra-gelo.",
+        "description": "Oração de consagração do dia, dinâmicas de integração e início da adoração ao Senhor.",
         "location": "Nave Principal"
       },
       {
         "id": "sch-3",
-        "time": "19h30 - 20h20",
-        "title": "Louvor & Adoração ao Vivo",
-        "speaker": "Banda do Ministério de Louvor Jovem IEPC",
-        "description": "Momento de celebração e profunda adoração com canções congregacionais e contemporâneas.",
+        "time": "09h45 - 11h45",
+        "title": "Louvor ao Vivo & 1ª Ministração da Palavra",
+        "speaker": "Ministério de Louvor Jovem IEPC & Pastores",
+        "description": "Forte momento de celebração e primeira mensagem bíblica direcionada para a vida dos jovens.",
         "location": "Altar Central"
       },
       {
         "id": "sch-4",
-        "time": "20h20 - 21h20",
-        "title": "Ministração da Palavra: Juventude com Propósito",
-        "speaker": "Ministro da Palavra / Pastores da IEPC",
-        "description": "Mensagem prática das Escrituras sobre identidade cristã, integridade, vocação e fé nos dias atuais.",
-        "location": "Púlpito do Templo"
+        "time": "11h45 - 13h30",
+        "title": "Intervalo para Almoço & Convivência",
+        "speaker": "Todos os Jovens e Visitantes",
+        "description": "Momento de confraternização, integração fraterna entre amigos e visitantes e descanso.",
+        "location": "Área de Convivência"
       },
       {
         "id": "sch-5",
-        "time": "21h20 - 21h45",
-        "title": "Clamor no Altar & Oração pelos Jovens",
-        "speaker": "Corpo Pastoral e Líderes IEPC",
-        "description": "Tempo de entrega, oração por propósitos, renovo espiritual e busca pela presença de Deus.",
-        "location": "Frente do Altar"
+        "time": "13h30 - 15h30",
+        "title": "Painel dos Jovens, Dinâmicas & Testemunhos",
+        "speaker": "Líderes de Jovens e Convidados",
+        "description": "Roda de conversa cristã, testemunhos edificantes e perguntas da juventude.",
+        "location": "Auditório Central dos Jovens"
       },
       {
         "id": "sch-6",
-        "time": "21h45 - 22h30",
-        "title": "Confraternização, Fotos & Comunhão",
-        "speaker": "Todos os Jovens e Amigos",
-        "description": "Momento de alegria, fotos no backdrop dos jovens, lanche especial de confraternização e novas amizades.",
-        "location": "Área de Convivência da IEPC"
+        "time": "15h30 - 17h00",
+        "title": "Louvor Acústico, Gincana Bíblica & Atividades",
+        "speaker": "Equipe de Dinâmicas e Louvor",
+        "description": "Atividades interativas, quebra-gelo e momentos especiais de aprendizado da Palavra.",
+        "location": "Nave Principal"
+      },
+      {
+        "id": "sch-7",
+        "time": "17h00 - 18h00",
+        "title": "Lanche da Tarde & Sessão de Fotos",
+        "speaker": "Todos os Participantes",
+        "description": "Lanche especial da tarde, fotos comemorativas no backdrop do evento e comunhão.",
+        "location": "Área de Convivência"
+      },
+      {
+        "id": "sch-8",
+        "time": "18h00 - 21h00",
+        "title": "Grande Culto de Avivamento & Clamor no Altar",
+        "speaker": "Corpo Pastoral & Ministros Convidados",
+        "description": "Culto solene de encerramento com louvor vibrante, pregação avivada, clamor no altar e consagração da juventude.",
+        "location": "Templo Sede IEPC"
       }
     ],
     "faq": [
@@ -100,7 +116,7 @@
       {
         "id": "faq-3",
         "question": "Qual a data e horário exatos do evento?",
-        "answer": "O evento acontecerá no mês de Novembro de 2026, com horário não definido (a ser informado pela liderança da igreja). O dia e o horário específicos serão divulgados nos cultos e atualizados nesta página. Sua inscrição antecipada já garante sua vaga e confecção do crachá!"
+        "answer": "O Evento dos Jovens acontecerá no dia 21 de Novembro de 2026 (sábado). Começará às 8h da manhã com um delicioso café da manhã para todos e se estenderá durante o dia inteiro com louvor, ministrações, dinâmicas, almoço e encerramento com o Culto de Avivamento!"
       },
       {
         "id": "faq-4",
@@ -147,8 +163,8 @@
       "name": "Administrador IEPC",
       "email": "admin@iepc.com",
       "role": "ADMIN",
-      "passwordHash": "2f58c794d2e423cf490727d90bf45f75d6ad384cf0e0bef13dbb23145c7f8af48a3add7b76884c098698ba8aa3f99905bf3db3d2be1e77a44f58f96dfda9837c",
-      "salt": "2ddff9adf4ca77ed67a4ec049420c878",
+      "passwordHash": "48633eba6e72b291b02a4a880cce20dc4b6c444584320d43a83312f679526afa4e05ee0754a735725eba23087d3d5de974ba9acda8a7747cc2e5367aa6338098",
+      "salt": "fec5d3dd7943ffe98a0fafedb01a967b",
       "createdAt": "2026-09-20T12:00:00.000Z"
     }
   ],

@@ -328,7 +328,11 @@ export function buildVoucherEmailHtml(reg: RegistrationEmailData): string {
           </tr>
           <tr>
             <td class="details-label">Data do Evento</td>
-            <td class="details-value">Novembro / 2026</td>
+            <td class="details-value">21 de Novembro de 2026 (Sábado)</td>
+          </tr>
+          <tr>
+            <td class="details-label">Horário de Início</td>
+            <td class="details-value">A partir das 08h00 (Café da Manhã) • O dia todo</td>
           </tr>
           <tr>
             <td class="details-label">Local</td>

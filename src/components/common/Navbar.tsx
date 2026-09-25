@@ -67,6 +67,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             </button>
             <button
               type="button"
+              onClick={() => handleNav('#cronograma')}
+              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+            >
+              Cronograma (8h às 21h)
+            </button>
+            <button
+              type="button"
               onClick={() => handleNav('#informacoes')}
               className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
             >
@@ -175,6 +182,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
               className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
             >
               Sobre o Evento
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNav('#cronograma')}
+              className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg flex items-center justify-between"
+            >
+              <span>Cronograma Oficial</span>
+              <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">8h às 21h</span>
             </button>
             <button
               type="button"

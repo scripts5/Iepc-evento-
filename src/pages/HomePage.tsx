@@ -38,9 +38,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const pctFilled = Math.min(100, Math.round((registeredCount / maxCap) * 100));
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'Mês de Novembro / 2026 (Dia a definir)';
-    if (dateStr.includes('2026-11')) {
-      return 'Mês de Novembro / 2026 (Dia a definir)';
+    if (!dateStr) return '21 de Novembro de 2026 (Sábado)';
+    if (dateStr === '2026-11-21' || dateStr.includes('2026-11-21')) {
+      return '21 de Novembro de 2026 (Sábado)';
     }
     const parts = dateStr.split('-');
     if (parts.length !== 3) return dateStr;
@@ -106,7 +106,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       Horário
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-800">
-                      {activeEvent.time && activeEvent.time !== '19h00 às 22h00' ? activeEvent.time : 'Horário não definido'}
+                      {activeEvent.time || 'A partir das 08h00 (Café) • O dia todo'}
                     </span>
                   </div>
                 </div>
@@ -284,7 +284,76 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 3. PERGUNTAS FREQUENTES (FAQ) */}
+      {/* 3. CRONOGRAMA & PROGRAMAÇÃO DO EVENTO */}
+      <section id="cronograma" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center space-y-3 mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-xs font-bold text-indigo-700 shadow-xs">
+            <Clock className="w-3.5 h-3.5 text-indigo-600" />
+            <span>21 de Novembro de 2026 • Sábado</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Programação Oficial do Dia
+          </h2>
+          <p className="text-sm text-slate-600 max-w-2xl mx-auto">
+            Começaremos às <strong>08h00 da manhã</strong> com um delicioso café da manhã para todos e teremos uma programação especial durante o dia inteiro.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(activeEvent.schedule || []).map((item, index) => (
+            <div
+              key={item.id || index}
+              className={`p-5 rounded-2xl border transition-all ${
+                index === 0
+                  ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-xs'
+                  : index === (activeEvent.schedule?.length || 0) - 1
+                  ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 shadow-xs'
+                  : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2 mb-2.5">
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black ${
+                  index === 0
+                    ? 'bg-amber-100 text-amber-900'
+                    : index === (activeEvent.schedule?.length || 0) - 1
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-slate-100 text-slate-800'
+                }`}>
+                  <Clock className="w-3 h-3" />
+                  {item.time}
+                </span>
+                {index === 0 && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-full">
+                    ☕ Café da Manhã
+                  </span>
+                )}
+                {index === (activeEvent.schedule?.length || 0) - 1 && (
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    🔥 Avivamento
+                  </span>
+                )}
+              </div>
+
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                {item.title}
+              </h3>
+
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                {item.description}
+              </p>
+
+              {item.location && (
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                  <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                  <span className="truncate">{item.location}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. PERGUNTAS FREQUENTES (FAQ) */}
       <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-10">
           <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">

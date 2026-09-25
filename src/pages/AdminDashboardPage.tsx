@@ -180,7 +180,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              {event?.startDate?.includes('2026-11') ? 'Novembro / 2026' : event?.startDate} • {event?.locationName || 'Templo Sede IEPC'} • Capacidade Máxima: {event?.maxCapacity || 600} vagas
+              {event?.startDate === '2026-11-21' ? '21 de Novembro de 2026 (Sábado) • A partir das 08h (Café) • O dia todo' : (event?.startDate || '21/11/2026')} • {event?.locationName || 'Templo Sede IEPC'} • Capacidade Máxima: {event?.maxCapacity || 600} vagas
             </p>
           </div>
         </div>

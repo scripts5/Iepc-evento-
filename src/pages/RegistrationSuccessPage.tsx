@@ -105,7 +105,8 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
       `• Código Oficial: ${registration.code}\n` +
       `• Categoria: ${registration.ticketType}\n` +
       `• Local: ${event?.locationName || 'Templo Sede da IEPC'}\n` +
-      `• Data: Novembro / 2026\n\n` +
+      `• Data: 21 de Novembro de 2026 (Sábado)\n` +
+      `• Horário: A partir das 08h00 (Café da Manhã) • O dia todo\n\n` +
       `Status: Inscrição 100% Confirmada e Autorizada. Apresente este código na entrada do evento para retirar seu Mini Crachá oficial.`
     );
     window.open(`mailto:${registration.email}?subject=${subject}&body=${body}`, '_blank');
@@ -207,11 +208,16 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
           )}
 
           <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
-            <span className="font-semibold text-slate-500">Data e Local:</span>
+            <span className="font-semibold text-slate-500">Data e Horário:</span>
+            <span className="font-bold text-slate-800 text-right">
+              21/11/2026 (Sábado) às 08h (Café da Manhã) • O dia todo
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
+            <span className="font-semibold text-slate-500">Local:</span>
             <span className="font-medium text-slate-800 text-right">
-              {event?.startDate?.includes('2026-11')
-                ? 'Novembro / 2026'
-                : (event?.startDate ? event.startDate.split('-').reverse().join('/') : 'Novembro / 2026')} • {event?.locationName || 'Templo Sede IEPC'}
+              {event?.locationName || 'Templo Sede IEPC'}
             </span>
           </div>
 
