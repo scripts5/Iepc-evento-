@@ -29,7 +29,7 @@ export const defaultEventData: EventConfig & { registeredCount: number; isCapaci
   bannerUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80',
   maxCapacity: 600,
   isRegistrationOpen: true,
-  registeredCount: 7,
+  registeredCount: 0,
   isCapacityFull: false,
   ticketTypes: [
     {
@@ -147,121 +147,33 @@ export const defaultEventData: EventConfig & { registeredCount: number; isCapaci
   certificateConfig: defaultCertificateConfig,
 };
 
-export const defaultRegistrations = [
-  {
-    id: 'reg-1',
-    code: 'EVT-26-JOV01',
-    name: 'Gabriel Santos Oliveira',
-    email: 'gabriel.santos@iepc.com.br',
-    phone: '(11) 98234-5678',
-    birthDate: '2004-05-12',
-    city: 'São Paulo',
-    state: 'SP',
-    organization: 'IEPC Templo Sede',
-    ticketType: 'jovem-iepc',
-    notes: 'Banda de Louvor Jovem',
-    createdAt: '2026-09-15T09:30:00.000Z',
-    status: 'Presente' as const,
-    checkedInAt: '2026-09-20T18:45:00.000Z',
-    checkedInBy: 'Liderança Jovem',
-    certificateCode: 'CERT-26-JOV01',
-    termsAccepted: true,
-  },
-  {
-    id: 'reg-2',
-    code: 'EVT-26-JOV02',
-    name: 'Beatriz Helena de Souza',
-    email: 'beatriz.souza@iepc.com.br',
-    phone: '(11) 97123-8899',
-    birthDate: '2005-11-23',
-    city: 'São Paulo',
-    state: 'SP',
-    organization: 'IEPC Templo Sede',
-    ticketType: 'jovem-iepc',
-    notes: '',
-    createdAt: '2026-09-16T14:20:00.000Z',
-    status: 'Presente' as const,
-    checkedInAt: '2026-09-20T18:50:00.000Z',
-    checkedInBy: 'Liderança Jovem',
-    certificateCode: 'CERT-26-JOV02',
-    termsAccepted: true,
-  },
-  {
-    id: 'reg-3',
-    code: 'EVT-26-JOV03',
-    name: 'Matheus Henrique Lima',
-    email: 'matheus.lima@gmail.com',
-    phone: '',
-    birthDate: '2003-03-04',
-    city: 'Osasco',
-    state: 'SP',
-    organization: 'Amigo Convidado',
-    ticketType: 'jovem-convidado',
-    notes: 'Convidado pelo Gabriel',
-    createdAt: '2026-09-17T11:10:00.000Z',
-    status: 'Confirmado' as const,
-    termsAccepted: true,
-  },
-  {
-    id: 'reg-4',
-    code: 'EVT-26-JOV04',
-    name: 'Larissa Menezes Rocha',
-    email: 'larissa.rocha@iepc.com.br',
-    phone: '(11) 99234-9988',
-    birthDate: '2000-08-19',
-    city: 'São Paulo',
-    state: 'SP',
-    organization: 'IEPC - Equipe de Acolhimento',
-    ticketType: 'lideranca-apoio',
-    notes: 'Equipe de recepção e crachás',
-    createdAt: '2026-09-18T16:45:00.000Z',
-    status: 'Confirmado' as const,
-    termsAccepted: true,
-  },
-  {
-    id: 'reg-5',
-    code: 'EVT-26-JOV05',
-    name: 'Lucas Eduardo Pereira',
-    email: 'lucas.pereira@gmail.com',
-    phone: '(11) 97654-3210',
-    birthDate: '2006-01-30',
-    city: 'Guarulhos',
-    state: 'SP',
-    organization: 'Comunidade Cristã',
-    ticketType: 'Convidado',
-    createdAt: '2026-09-19T10:15:00.000Z',
-    status: 'Confirmado' as const,
-    termsAccepted: true,
-  },
-  {
-    id: 'reg-6',
-    code: 'EVT-26-JOV06',
-    name: 'Rebeca Vitória Silva',
-    email: 'rebeca.silva@iepc.com.br',
-    phone: '(11) 98122-3344',
-    birthDate: '2002-09-14',
-    city: 'São Paulo',
-    state: 'SP',
-    organization: 'IEPC Congregação Norte',
-    ticketType: 'Membro IEPC',
-    notes: 'Grupo de Louvor e Dança',
-    createdAt: '2026-09-19T13:00:00.000Z',
-    status: 'Confirmado' as const,
-    termsAccepted: true,
-  },
-];
+export const defaultRegistrations: any[] = [];
 
 export function getLocalRegistrations() {
   try {
     const raw = localStorage.getItem('eventpass_local_registrations');
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) {
+        // Exclude legacy mock/test records
+        const clean = parsed.filter(
+          (r: any) =>
+            r.id !== 'reg-1' &&
+            r.id !== 'reg-2' &&
+            r.id !== 'reg-3' &&
+            r.id !== 'reg-4' &&
+            r.id !== 'reg-5' &&
+            r.id !== 'reg-6' &&
+            r.id !== 'reg-1789951659315-927' &&
+            !r.code?.includes('JOV')
+        );
+        return clean;
+      }
     }
   } catch (e) {
     console.error('Error reading local registrations:', e);
   }
-  return defaultRegistrations;
+  return [];
 }
 
 export function saveLocalRegistrations(regs: any[]) {

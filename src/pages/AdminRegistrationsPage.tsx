@@ -323,9 +323,9 @@ export const AdminRegistrationsPage: React.FC = () => {
           </div>
         ) : items.length === 0 ? (
           <div className="p-12 text-center space-y-2">
-            <p className="text-sm font-bold text-slate-700">Nenhum participante encontrado</p>
-            <p className="text-xs text-slate-400">
-              Tente redefinir os filtros ou alterar o termo de pesquisa.
+            <p className="text-sm font-bold text-slate-700">Nenhum cadastro encontrado</p>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Todos os cadastros de teste foram removidos. Conforme os jovens e convidados realizarem suas inscrições no site, elas aparecerão aqui automaticamente em tempo real.
             </p>
           </div>
         ) : (

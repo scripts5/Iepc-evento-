@@ -277,20 +277,28 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {recent.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-slate-700">{r.code}</td>
-                  <td className="py-3 px-4 font-semibold text-slate-900">{r.name}</td>
-                  <td className="py-3 px-4 text-slate-600 truncate max-w-[180px]">{r.email}</td>
-                  <td className="py-3 px-4 capitalize font-medium text-slate-700">{r.ticketType}</td>
-                  <td className="py-3 px-4">
-                    <StatusBadge status={r.status} />
-                  </td>
-                  <td className="py-3 px-4 text-slate-500">
-                    {new Date(r.createdAt).toLocaleDateString('pt-BR')}
+              {recent.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
+                    Nenhum check-in registrado ainda. As presenças confirmadas aparecerão aqui automaticamente.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recent.map((r) => (
+                  <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-slate-700">{r.code}</td>
+                    <td className="py-3 px-4 font-semibold text-slate-900">{r.name}</td>
+                    <td className="py-3 px-4 text-slate-600 truncate max-w-[180px]">{r.email}</td>
+                    <td className="py-3 px-4 capitalize font-medium text-slate-700">{r.ticketType}</td>
+                    <td className="py-3 px-4">
+                      <StatusBadge status={r.status} />
+                    </td>
+                    <td className="py-3 px-4 text-slate-500">
+                      {new Date(r.createdAt).toLocaleDateString('pt-BR')}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

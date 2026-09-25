@@ -212,106 +212,7 @@ const defaultEventConfig: EventConfig = {
 };
 
 function generateDemoRegistrations(): Registration[] {
-  const demoList: Omit<Registration, 'code' | 'id' | 'qrCodeDataUrl'>[] = [
-    {
-      name: 'Gabriel Santos Oliveira',
-      email: 'gabriel.santos@iepc.com.br',
-      phone: '(11) 98234-5678',
-      birthDate: '2004-05-12',
-      city: 'São Paulo',
-      state: 'SP',
-      organization: 'IEPC Templo Sede',
-      ticketType: 'jovem-iepc',
-      notes: 'Banda de Louvor Jovem',
-      createdAt: '2026-09-15T09:30:00.000Z',
-      status: 'Presente',
-      checkedInAt: '2026-09-20T18:45:00.000Z',
-      checkedInBy: 'Liderança Jovem',
-      certificateCode: 'CERT-26-1001',
-      termsAccepted: true,
-    },
-    {
-      name: 'Beatriz Helena de Souza',
-      email: 'beatriz.souza@iepc.com.br',
-      phone: '(11) 97123-8899',
-      birthDate: '2005-11-23',
-      city: 'São Paulo',
-      state: 'SP',
-      organization: 'IEPC Templo Sede',
-      ticketType: 'jovem-iepc',
-      notes: '',
-      createdAt: '2026-09-16T14:20:00.000Z',
-      status: 'Presente',
-      checkedInAt: '2026-09-20T18:50:00.000Z',
-      checkedInBy: 'Liderança Jovem',
-      certificateCode: 'CERT-26-1002',
-      termsAccepted: true,
-    },
-    {
-      name: 'Matheus Henrique Lima',
-      email: 'matheus.lima@gmail.com',
-      phone: '',
-      birthDate: '2003-03-04',
-      city: 'Osasco',
-      state: 'SP',
-      organization: 'Amigo Convidado',
-      ticketType: 'jovem-convidado',
-      notes: 'Convidado pelo Gabriel',
-      createdAt: '2026-09-17T11:10:00.000Z',
-      status: 'Confirmado',
-      termsAccepted: true,
-    },
-    {
-      name: 'Larissa Menezes Rocha',
-      email: 'larissa.rocha@iepc.com.br',
-      phone: '(11) 99234-9988',
-      birthDate: '2000-08-19',
-      city: 'São Paulo',
-      state: 'SP',
-      organization: 'IEPC - Equipe de Acolhimento',
-      ticketType: 'lideranca-apoio',
-      notes: 'Equipe de recepção e crachás',
-      createdAt: '2026-09-18T16:45:00.000Z',
-      status: 'Confirmado',
-      termsAccepted: true,
-    },
-    {
-      name: 'Lucas Eduardo Pereira',
-      email: 'lucas.pereira@gmail.com',
-      phone: '',
-      birthDate: '2006-01-30',
-      city: 'Guarulhos',
-      state: 'SP',
-      organization: 'Amigo Convidado',
-      ticketType: 'jovem-convidado',
-      createdAt: '2026-09-19T10:15:00.000Z',
-      status: 'Inscrito',
-      termsAccepted: true,
-    },
-    {
-      name: 'Rebeca Vitória Silva',
-      email: 'rebeca.silva@iepc.com.br',
-      phone: '(11) 98122-3344',
-      birthDate: '2002-09-14',
-      city: 'São Paulo',
-      state: 'SP',
-      organization: 'IEPC Congregação Norte',
-      ticketType: 'jovem-iepc',
-      notes: 'Grupo de Teatro e Dança',
-      createdAt: '2026-09-19T13:00:00.000Z',
-      status: 'Inscrito',
-      termsAccepted: true,
-    }
-  ];
-
-  return demoList.map((item, index) => {
-    const code = `EVT-26-${(1001 + index).toString(16).toUpperCase()}${Math.floor(10 + Math.random() * 90)}`;
-    return {
-      ...item,
-      id: `reg-${index + 1}`,
-      code,
-    };
-  });
+  return [];
 }
 
 function loadDatabase(): DatabaseSchema {
@@ -329,8 +230,23 @@ function loadDatabase(): DatabaseSchema {
       // Migrate from old Summit event to real IEPC Youth event if detected
       if (!loaded.event || loaded.event.id === 'evt-2026-main' || (loaded.event.name && loaded.event.name.includes('Summit'))) {
         loaded.event = defaultEventConfig;
-        loaded.registrations = generateDemoRegistrations();
+        loaded.registrations = [];
         hadUpdates = true;
+      }
+
+      // Clean out any old mock/test registrations so the system is ready for real users
+      if (Array.isArray(loaded.registrations) && loaded.registrations.some(r => r.id === 'reg-1' || r.id === 'reg-2' || r.code?.includes('JOV'))) {
+        loaded.registrations = [];
+        hadUpdates = true;
+      }
+
+      // Clean out any test admin accounts with @gmail.com
+      if (Array.isArray(loaded.users)) {
+        const cleanUsers = loaded.users.filter(u => !u.email.includes('@gmail.com'));
+        if (cleanUsers.length !== loaded.users.length) {
+          loaded.users = cleanUsers;
+          hadUpdates = true;
+        }
       }
 
       if (!loaded.event.time || loaded.event.time === '19h00 às 22h00' || loaded.event.time === 'Horário a definir') {

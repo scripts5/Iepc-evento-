@@ -18,6 +18,27 @@ import {
   defaultRegistrations,
 } from '../data/defaultEvent.ts';
 
+// Auto cleanup any old test/mock data from user's browser localStorage
+try {
+  const localRegsRaw = localStorage.getItem('eventpass_local_registrations');
+  if (localRegsRaw) {
+    const parsed = JSON.parse(localRegsRaw);
+    if (
+      Array.isArray(parsed) &&
+      parsed.some(
+        (r: any) =>
+          r.id === 'reg-1' ||
+          r.id === 'reg-2' ||
+          r.code?.includes('JOV') ||
+          r.email?.includes('gabriel.santos@iepc') ||
+          r.email?.includes('mateus.jovem@gmail')
+      )
+    ) {
+      localStorage.removeItem('eventpass_local_registrations');
+    }
+  }
+} catch {}
+
 function getAuthToken(): string | null {
   return localStorage.getItem('eventpass_admin_token');
 }
@@ -370,6 +391,37 @@ export const api = {
     const capacityProgress = maxCap > 0 ? Math.min(100, Math.round((activeRegs.length / maxCap) * 100)) : 0;
     const presenceRate = activeRegs.length > 0 ? Math.round((checkedIn.length / activeRegs.length) * 100) : 0;
 
+    // Dynamic time-series (last 7 days)
+    const dateMap = new Map<string, number>();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      dateMap.set(`${day}/${month}`, 0);
+    }
+    activeRegs.forEach((r: any) => {
+      if (r.createdAt) {
+        const d = new Date(r.createdAt);
+        if (!isNaN(d.getTime())) {
+          const key = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+          if (dateMap.has(key)) {
+            dateMap.set(key, (dateMap.get(key) || 0) + 1);
+          }
+        }
+      }
+    });
+
+    const registrationsOverTime = Array.from(dateMap.entries()).map(([date, count]) => ({ date, count }));
+
+    // Dynamic ticket type breakdown
+    const ticketMap = new Map<string, number>();
+    activeRegs.forEach((r: any) => {
+      const type = r.ticketType || 'Membro IEPC';
+      ticketMap.set(type, (ticketMap.get(type) || 0) + 1);
+    });
+    const byTicketType = Array.from(ticketMap.entries()).map(([name, count]) => ({ name, count }));
+
     return {
       totalRegistrations: activeRegs.length,
       todayRegistrations: activeRegs.length,
@@ -379,19 +431,8 @@ export const api = {
       presenceRate,
       capacityProgress,
       maxCapacity: maxCap,
-      registrationsOverTime: [
-        { date: '15/09', count: 1 },
-        { date: '16/09', count: 1 },
-        { date: '17/09', count: 1 },
-        { date: '18/09', count: 1 },
-        { date: '19/09', count: 2 },
-        { date: '21/09', count: 1 },
-      ],
-      byTicketType: [
-        { name: 'Jovem IEPC', count: activeRegs.filter((r: any) => r.ticketType === 'jovem-iepc').length },
-        { name: 'Jovem Convidado', count: activeRegs.filter((r: any) => r.ticketType === 'jovem-convidado').length },
-        { name: 'Liderança & Apoio', count: activeRegs.filter((r: any) => r.ticketType === 'lideranca-apoio').length },
-      ],
+      registrationsOverTime,
+      byTicketType,
       byStatus: [
         { status: 'Presente', count: checkedIn.length },
         { status: 'Confirmado', count: confirmed.length },
