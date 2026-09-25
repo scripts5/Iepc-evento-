@@ -132,14 +132,31 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       showToast('Gerando certificado em alta resolução...', 'info');
 
       const element = certificateRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
+      let imgData = '';
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          imageTimeout: 6000,
+        });
+        imgData = canvas.toDataURL('image/jpeg', 0.95);
+      } catch (canvasErr) {
+        console.warn('Fallback para escala 1x no html2canvas:', canvasErr);
+        const canvas = await html2canvas(element, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+        });
+        imgData = canvas.toDataURL('image/jpeg', 0.90);
+      }
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      if (!imgData) throw new Error('Não foi possível gerar imagem.');
+
       // A4 Landscape is 297mm x 210mm
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -148,12 +165,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       });
 
       pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-      const safeName = registration.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const safeName = (registration.name || 'participante').toLowerCase().replace(/[^a-z0-9]/g, '-');
       pdf.save(`certificado-${safeName}-${certCode}.pdf`);
       showToast('Certificado baixado com sucesso!', 'success');
     } catch (err) {
       console.error('Error generating PDF:', err);
-      showToast('Erro ao gerar arquivo PDF. Utilize a opção de impressão.', 'error');
+      showToast('Abrindo diálogo de impressão direta para salvar em PDF...', 'info');
+      setTimeout(() => window.print(), 300);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -166,14 +184,31 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       showToast('Gerando crachá em alta resolução...', 'info');
 
       const element = badgeRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
+      let imgData = '';
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          imageTimeout: 6000,
+        });
+        imgData = canvas.toDataURL('image/jpeg', 0.95);
+      } catch (canvasErr) {
+        console.warn('Fallback escala 1x para crachá:', canvasErr);
+        const canvas = await html2canvas(element, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+        });
+        imgData = canvas.toDataURL('image/jpeg', 0.90);
+      }
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      if (!imgData) throw new Error('Não foi possível gerar imagem do crachá.');
+
       // Badge portrait size 100mm x 150mm
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -182,12 +217,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       });
 
       pdf.addImage(imgData, 'JPEG', 0, 0, 100, 150);
-      const safeName = registration.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const safeName = (registration.name || 'participante').toLowerCase().replace(/[^a-z0-9]/g, '-');
       pdf.save(`cracha-${safeName}-${registration.code}.pdf`);
       showToast('Mini crachá baixado com sucesso!', 'success');
     } catch (err) {
       console.error('Error generating badge PDF:', err);
-      showToast('Erro ao gerar crachá.', 'error');
+      showToast('Abrindo diálogo de impressão para salvar em PDF...', 'info');
+      setTimeout(() => window.print(), 300);
     } finally {
       setIsGeneratingPdf(false);
     }

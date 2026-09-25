@@ -72,13 +72,43 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadQr = () => {
-    if (!registration.qrCodeDataUrl) return;
-    const a = document.createElement('a');
-    a.href = registration.qrCodeDataUrl;
-    a.download = `ingresso-${registration.code}.png`;
-    a.click();
-    showToast('Download do QR Code iniciado!', 'success');
+  const handleDownloadQr = async () => {
+    if (!registration?.qrCodeDataUrl) return;
+    try {
+      const res = await fetch(registration.qrCodeDataUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `qrcode-iepc-${registration.code}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      showToast('Download do QR Code concluído com sucesso!', 'success');
+    } catch {
+      const a = document.createElement('a');
+      a.href = registration.qrCodeDataUrl;
+      a.download = `qrcode-iepc-${registration.code}.png`;
+      a.click();
+      showToast('Download do QR Code iniciado!', 'success');
+    }
+  };
+
+  const handleOpenGmail = () => {
+    if (!registration) return;
+    const subject = encodeURIComponent(`Comprovante de Inscrição IEPC 2026 - Código: ${registration.code}`);
+    const body = encodeURIComponent(
+      `A paz do Senhor!\n\n` +
+      `Comprovante Oficial de Inscrição para a Conferência de Jovens da IEPC 2026:\n\n` +
+      `• Participante: ${registration.name}\n` +
+      `• Código Oficial: ${registration.code}\n` +
+      `• Categoria: ${registration.ticketType}\n` +
+      `• Local: ${event?.locationName || 'Templo Sede da IEPC'}\n` +
+      `• Data: Novembro / 2026\n\n` +
+      `Status: Inscrição 100% Confirmada e Autorizada. Apresente este código na entrada do evento para retirar seu Mini Crachá oficial.`
+    );
+    window.open(`mailto:${registration.email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   return (
@@ -258,23 +288,32 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
         </div>
 
         {/* Actions Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           <button
             type="button"
             onClick={() => setIsVoucherModalOpen(true)}
-            className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-colors"
+            className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            Visualizar / Imprimir Comprovante
+            Visualizar Comprovante
           </button>
 
           <button
             type="button"
             onClick={handleDownloadQr}
-            className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 flex items-center justify-center gap-2 transition-colors"
+            className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4" />
-            Salvar Imagem do QR Code
+            Salvar QR Code
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenGmail}
+            className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <Mail className="w-4 h-4 text-emerald-600" />
+            Abrir no Gmail
           </button>
         </div>
 

@@ -27,12 +27,25 @@ export const VoucherModal: React.FC<VoucherModalProps> = ({
     window.print();
   };
 
-  const handleDownloadQr = () => {
+  const handleDownloadQr = async () => {
     if (!registration.qrCodeDataUrl) return;
-    const a = document.createElement('a');
-    a.href = registration.qrCodeDataUrl;
-    a.download = `qrcode-${registration.code}.png`;
-    a.click();
+    try {
+      const res = await fetch(registration.qrCodeDataUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `qrcode-${registration.code}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+    } catch {
+      const a = document.createElement('a');
+      a.href = registration.qrCodeDataUrl;
+      a.download = `qrcode-${registration.code}.png`;
+      a.click();
+    }
   };
 
   return (

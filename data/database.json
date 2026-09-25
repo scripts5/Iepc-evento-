@@ -147,8 +147,8 @@
       "name": "Administrador IEPC",
       "email": "admin@iepc.com",
       "role": "ADMIN",
-      "passwordHash": "fd5cf578665bff3c456bea90aad8301ed74dbcce34ff3a32ccac95dfd7637bd9b504a88ac1c0d38a5c4dbfcf0a009bcbdc2d0665edf14caf202d67409b28c336",
-      "salt": "ca046f7493898777c88d85c84b8c96ec",
+      "passwordHash": "48997909265da9c73d35c3979013697cd9ebaf2ede56721d7c2fd8f585d43dedb313ca1b2390c6dab9b5f5e3167f7b0a2df094cf374dcd24bedbd1822df3987b",
+      "salt": "6f2074e58363ce6327ecf361558976a0",
       "createdAt": "2026-09-20T12:00:00.000Z"
     }
   ],

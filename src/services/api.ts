@@ -506,12 +506,12 @@ export const api = {
       );
     }
 
-    if (params.status && params.status !== 'all') {
-      items = items.filter((r: any) => r.status === params.status);
+    if (params.status && params.status !== 'all' && params.status !== 'todos') {
+      items = items.filter((r: any) => r.status?.toLowerCase() === params.status?.toLowerCase());
     }
 
-    if (params.ticketType && params.ticketType !== 'all') {
-      items = items.filter((r: any) => r.ticketType === params.ticketType);
+    if (params.ticketType && params.ticketType !== 'all' && params.ticketType !== 'todos') {
+      items = items.filter((r: any) => r.ticketType?.toLowerCase() === params.ticketType?.toLowerCase());
     }
 
     if (params.onlyCheckedIn) {

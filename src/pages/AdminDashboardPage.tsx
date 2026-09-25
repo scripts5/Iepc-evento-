@@ -28,6 +28,7 @@ import { DashboardStats, Registration } from '../types/index.ts';
 import { useToast } from '../context/ToastContext.tsx';
 import { StatusBadge } from '../components/common/Badge.tsx';
 import { AdminRandomWidget } from '../components/admin/AdminRandomWidget.tsx';
+import { AdminDataVisualization } from '../components/admin/AdminDataVisualization.tsx';
 
 interface AdminDashboardPageProps {
   onNavigate: (path: string) => void;
@@ -44,7 +45,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
       setLoading(true);
       const [statsData, regsData] = await Promise.all([
         api.getAdminStats(),
-        api.getAdminRegistrations({ limit: 6, status: 'Presente', sortBy: 'date', sortOrder: 'desc' }),
+        api.getAdminRegistrations({ limit: 10, sortBy: 'date', sortOrder: 'desc' }),
       ]);
       setStats(statsData);
       setRecent(regsData.items);
@@ -172,6 +173,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
         })}
       </div>
 
+      {/* Recharts Data Visualization Component: Total Registrations, Check-in Rate, Denomination Breakdown */}
+      <AdminDataVisualization stats={stats} />
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Registration Trend Chart */}
@@ -242,24 +246,24 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
         </div>
       </div>
 
-      {/* Checked-in Registrations Table Snippet */}
+      {/* Recent Registrations Table Snippet */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">Participantes com Check-in Realizado</h3>
-              <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                Portaria Ativa
+              <h3 className="text-base font-bold text-slate-900">Últimos Participantes Cadastrados</h3>
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                Aparecem Automaticamente
               </span>
             </div>
-            <p className="text-xs text-slate-500">Últimos jovens com presença confirmada no evento</p>
+            <p className="text-xs text-slate-500">Membros e convidados inscritos no evento (sem necessidade de autorização manual)</p>
           </div>
           <button
             type="button"
             onClick={() => onNavigate('/admin/inscritos')}
             className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
           >
-            Ver lista de credenciados
+            Ver lista completa de inscritos
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -280,7 +284,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
               {recent.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
-                    Nenhum check-in registrado ainda. As presenças confirmadas aparecerão aqui automaticamente.
+                    Nenhum membro inscrito no momento (base de dados zerada). Os participantes aparecerão aqui automaticamente logo após o preenchimento do formulário.
                   </td>
                 </tr>
               ) : (
