@@ -168,6 +168,17 @@ export const AdminRegistrationsPage: React.FC = () => {
     window.open(url, '_blank');
   };
 
+  // Reenviar Comprovante por E-mail
+  const handleResendEmail = async (r: Registration) => {
+    try {
+      showToast(`Enviando comprovante para ${r.email}...`, 'info');
+      const res = await api.resendRegistrationEmail(r.id || r.code);
+      showToast(res.message || `Comprovante enviado com sucesso para ${r.email}!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao reenviar e-mail.', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header Controls */}
@@ -446,6 +457,16 @@ export const AdminRegistrationsPage: React.FC = () => {
                               <Eye className="w-4 h-4" />
                             </button>
 
+                            {/* Resend Email with Voucher & QR Code */}
+                            <button
+                              type="button"
+                              onClick={() => handleResendEmail(r)}
+                              title={`Reenviar Comprovante e QR Code por E-mail para ${r.email}`}
+                              className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </button>
+
                             {/* Edit details */}
                             <button
                               type="button"
@@ -547,8 +568,17 @@ export const AdminRegistrationsPage: React.FC = () => {
                             setIsViewModalOpen(true);
                           }}
                           className="p-1.5 text-slate-400 hover:text-slate-700"
+                          title="Visualizar"
                         >
                           <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleResendEmail(r)}
+                          className="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                          title={`Reenviar E-mail para ${r.email}`}
+                        >
+                          <Mail className="w-4 h-4" />
                         </button>
                         <button
                           type="button"

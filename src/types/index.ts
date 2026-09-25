@@ -134,6 +134,7 @@ export interface DashboardStats {
   registrationsOverTime: { date: string; count: number }[];
   byTicketType: { name: string; count: number }[];
   byStatus: { status: string; count: number }[];
+  byDenomination?: { name: string; count: number }[];
 }
 
 export interface CheckinResult {

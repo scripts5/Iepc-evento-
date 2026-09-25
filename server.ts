@@ -4,6 +4,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import QRCode from 'qrcode';
 import { createServer as createViteServer } from 'vite';
+import { sendRegistrationEmail, getEmailDeliveryLogs } from './src/server/mailer.ts';
 import {
   EventConfig,
   Registration,
@@ -556,12 +557,22 @@ async function startServer() {
       // Generate QR Code data URL for instant display
       const qrCodeDataUrl = await getQRCodeDataUrl(code);
 
+      // Automatically send confirmation email with voucher and QR code programmatically
+      let emailResult: { success: boolean; previewUrl?: string; messageId?: string; error?: string } = { success: false };
+      try {
+        emailResult = await sendRegistrationEmail(newRegistration, qrCodeDataUrl);
+      } catch (mailErr) {
+        console.warn('Erro não-bloqueante no envio automático de e-mail:', mailErr);
+      }
+
       res.status(201).json({
         message: 'Inscrição realizada com sucesso!',
         registration: {
           ...newRegistration,
           qrCodeDataUrl,
         },
+        emailSent: emailResult.success,
+        emailPreviewUrl: emailResult.previewUrl,
       });
     } catch (err: any) {
       console.error('Error creating registration:', err);
@@ -614,6 +625,38 @@ async function startServer() {
     } catch (err: any) {
       res.status(500).json({ error: 'Erro ao consultar inscrição.' });
     }
+  });
+
+  // Reenviar comprovante por e-mail com QR Code
+  app.post('/api/registrations/:id/resend-email', async (req: Request, res: Response) => {
+    try {
+      const regId = req.params.id;
+      const match = db.registrations.find(
+        r => r.id === regId || r.code.toUpperCase() === regId.toUpperCase()
+      );
+      if (!match) {
+        return res.status(404).json({ error: 'Inscrição não localizada para reenvio.' });
+      }
+
+      const qrCodeDataUrl = await getQRCodeDataUrl(match.code);
+      const emailResult = await sendRegistrationEmail(match, qrCodeDataUrl);
+
+      if (!emailResult.success) {
+        return res.status(500).json({ error: emailResult.error || 'Falha ao reenviar e-mail de confirmação.' });
+      }
+
+      res.json({
+        message: `Comprovante com QR Code reenviado com sucesso para ${match.email}!`,
+        previewUrl: emailResult.previewUrl,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Erro ao processar reenvio de e-mail.' });
+    }
+  });
+
+  // Consultar logs de e-mails enviados (painel admin)
+  app.get('/api/admin/email-logs', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+    res.json({ logs: getEmailDeliveryLogs() });
   });
 
   // 4. Public Certificate Retrieval & Verification
@@ -891,6 +934,19 @@ async function startServer() {
       };
     });
 
+    // Breakdown by Denomination (Igreja / Congregação / Organização)
+    const denominationMap = new Map<string, number>();
+    regs.forEach(r => {
+      if (r.status !== 'Cancelado') {
+        const denom = (r.organization || '').trim() || 'IEPC (Membro/Geral)';
+        denominationMap.set(denom, (denominationMap.get(denom) || 0) + 1);
+      }
+    });
+
+    const byDenomination = Array.from(denominationMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
     // Breakdown by Status
     const byStatus = [
       { status: 'Inscrito', count: inscribed },
@@ -911,6 +967,7 @@ async function startServer() {
       registrationsOverTime,
       byTicketType,
       byStatus,
+      byDenomination,
     };
 
     res.json(stats);

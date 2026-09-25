@@ -11,11 +11,13 @@ import {
   ArrowRight,
   Share2,
   Check,
+  Mail,
 } from 'lucide-react';
 import { Registration } from '../types/index.ts';
 import { useEvent } from '../context/EventContext.tsx';
 import { VoucherModal } from '../components/public/VoucherModal.tsx';
 import { useToast } from '../context/ToastContext.tsx';
+import { api } from '../services/api.ts';
 
 interface RegistrationSuccessPageProps {
   registration: Registration | null;
@@ -30,6 +32,20 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResendEmail = async () => {
+    if (!registration) return;
+    try {
+      setIsResending(true);
+      const res = await api.resendRegistrationEmail(registration.id || registration.code);
+      showToast(res.message || 'Comprovante reenviado para seu e-mail com sucesso!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Erro ao reenviar e-mail de confirmação.', 'error');
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   if (!registration) {
     return (
@@ -191,6 +207,43 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Autorizado e Confirmado
             </span>
+          </div>
+        </div>
+
+        {/* Email Automatic Dispatch Banner */}
+        <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-950 text-xs space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Mail className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold text-emerald-900 text-xs sm:text-sm">
+                  Comprovante e QR Code enviados para seu e-mail!
+                </p>
+                <p className="text-emerald-800/90 text-[11px] mt-0.5">
+                  Uma cópia oficial da inscrição com o código de acesso e QR Code foi enviada para <strong>{registration.email}</strong>.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={isResending}
+              onClick={handleResendEmail}
+              className="shrink-0 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-white hover:bg-emerald-100 rounded-xl border border-emerald-300 transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 self-end sm:self-auto"
+            >
+              {isResending ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-emerald-600/40 border-t-emerald-600 rounded-full animate-spin" />
+                  <span>Enviando...</span>
+                </>
+              ) : (
+                <>
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>Reenviar E-mail</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 

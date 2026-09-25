@@ -422,6 +422,14 @@ export const api = {
     });
     const byTicketType = Array.from(ticketMap.entries()).map(([name, count]) => ({ name, count }));
 
+    // Dynamic denomination breakdown
+    const denomMap = new Map<string, number>();
+    activeRegs.forEach((r: any) => {
+      const denom = (r.organization || '').trim() || 'IEPC (Membro/Geral)';
+      denomMap.set(denom, (denomMap.get(denom) || 0) + 1);
+    });
+    const byDenomination = Array.from(denomMap.entries()).map(([name, count]) => ({ name, count }));
+
     return {
       totalRegistrations: activeRegs.length,
       todayRegistrations: activeRegs.length,
@@ -439,6 +447,7 @@ export const api = {
         { status: 'Inscrito', count: pending.length },
         { status: 'Cancelado', count: canceled.length },
       ],
+      byDenomination,
     };
   },
 
@@ -747,6 +756,20 @@ export const api = {
     saveLocalRegistrations(defaultRegistrations);
     saveLocalEventData(defaultEventData);
     return { message: 'Dados restaurados com sucesso!' };
+  },
+
+  async resendRegistrationEmail(id: string): Promise<{ message: string; previewUrl?: string }> {
+    return await request<{ message: string; previewUrl?: string }>(`/api/registrations/${encodeURIComponent(id)}/resend-email`, {
+      method: 'POST',
+    });
+  },
+
+  async getAdminEmailLogs(): Promise<{ logs: any[] }> {
+    try {
+      return await request<{ logs: any[] }>('/api/admin/email-logs');
+    } catch {
+      return { logs: [] };
+    }
   },
 
   getExportCsvUrl(filters: { status?: string; ticketType?: string; search?: string } = {}): string {
