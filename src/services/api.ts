@@ -428,7 +428,17 @@ export const api = {
       if (params.page) query.set('page', params.page.toString());
       if (params.limit) query.set('limit', params.limit.toString());
 
-      return await request(`/api/admin/registrations?${query.toString()}`);
+      const res = await request<any>(`/api/admin/registrations?${query.toString()}`);
+      if (res && Array.isArray(res.items)) {
+        const localRegs = getLocalRegistrations();
+        const serverIds = new Set(res.items.map((r: any) => r.id || r.code));
+        const extraLocal = localRegs.filter((lr: any) => !serverIds.has(lr.id) && !serverIds.has(lr.code));
+        if (extraLocal.length > 0 && !params.onlyCheckedIn) {
+          res.items = [...extraLocal, ...res.items];
+          res.pagination.totalItems = (res.pagination.totalItems || res.items.length) + extraLocal.length;
+        }
+        return res;
+      }
     } catch {
       // Fallback
     }

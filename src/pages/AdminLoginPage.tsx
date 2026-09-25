@@ -22,13 +22,13 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate }) =>
 
     const cleanPass = password.trim();
     if (!cleanPass) {
-      setError('Coloque a senha para acessar (a senha é cpei).');
+      setError('Por favor, informe a senha para acessar.');
       return;
     }
 
     const lower = cleanPass.toLowerCase();
     if (lower !== 'cpei' && lower !== 'iepc' && lower !== 'admin') {
-      setError('Senha incorreta. A senha para acessar é cpei.');
+      setError('Senha incorreta. Tente novamente.');
       return;
     }
 
@@ -38,8 +38,8 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate }) =>
       showToast('Acesso autorizado! Bem-vindo(a) ao painel administrativo.', 'success');
       onNavigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Senha incorreta. A senha para acessar é cpei.');
-      showToast(err.message || 'Senha incorreta.', 'error');
+      setError('Senha incorreta. Tente novamente.');
+      showToast('Senha incorreta.', 'error');
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate }) =>
                     if (error) setError(null);
                   }}
                   autoFocus
-                  placeholder="Digite a senha (cpei)"
+                  placeholder="Digite a senha de acesso"
                   className="w-full pl-10 pr-10 py-3.5 text-sm rounded-xl border border-slate-700 bg-slate-800/80 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-hidden font-medium"
                 />
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-4" />
@@ -133,21 +133,6 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate }) =>
               </button>
             </div>
           </form>
-
-          {/* Atalho com a senha cpei */}
-          <div className="pt-4 border-t border-slate-800/80 text-center space-y-2">
-            <button
-              type="button"
-              onClick={() => {
-                setPassword('cpei');
-                setError(null);
-              }}
-              className="text-xs text-slate-400 hover:text-indigo-400 transition-colors inline-flex items-center gap-1.5 p-1 rounded-lg hover:bg-slate-800/60"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Senha de acesso: <strong className="text-indigo-300 font-mono font-bold">cpei</strong> (clique para preencher)</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -1012,7 +1012,7 @@ async function startServer() {
         sortBy = 'date',
         sortOrder = 'desc',
         page = '1',
-        limit = '15',
+        limit = '50',
       } = req.query as Record<string, string>;
 
       let filtered = [...db.registrations];

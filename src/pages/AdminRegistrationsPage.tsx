@@ -45,14 +45,14 @@ export const AdminRegistrationsPage: React.FC = () => {
 
   // Filters and Query
   const [search, setSearch] = useState('');
-  const [onlyCheckedIn, setOnlyCheckedIn] = useState(true);
+  const [onlyCheckedIn, setOnlyCheckedIn] = useState(false);
   const [statusFilter, setStatusFilter] = useState('todos');
   const [ticketFilter, setTicketFilter] = useState('todos');
   const [stateFilter, setStateFilter] = useState('todos');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [page, setPage] = useState(1);
-  const limit = 12;
+  const limit = 50;
 
   // Selected for View / Edit / Delete
   const [selectedAttendee, setSelectedAttendee] = useState<Registration | null>(null);
@@ -175,20 +175,20 @@ export const AdminRegistrationsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              {onlyCheckedIn ? 'Participantes com Check-in Realizado' : 'Lista Geral de Inscritos'}
+              {onlyCheckedIn ? 'Participantes com Check-in Realizado' : 'Todos os Cadastros e Inscrições'}
             </h2>
             <span
               className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
                 onlyCheckedIn
                   ? 'bg-purple-100 text-purple-800 border-purple-200'
-                  : 'bg-slate-100 text-slate-700 border-slate-200'
+                  : 'bg-emerald-100 text-emerald-800 border-emerald-200'
               }`}
             >
-              {onlyCheckedIn ? 'Filtro Check-in Ativo' : 'Todos os Cadastros'}
+              {onlyCheckedIn ? 'Filtro Check-in Ativo' : 'Histórico Completo (Todo o Período)'}
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            Total de <strong>{totalItems}</strong> participantes exibidos {onlyCheckedIn ? '(apenas com presença confirmada)' : '(todos os status)'}.
+            Total de <strong>{totalItems}</strong> participantes cadastrados {onlyCheckedIn ? '(apenas presentes)' : '(todos os períodos e cadastros)'}.
           </p>
         </div>
 
