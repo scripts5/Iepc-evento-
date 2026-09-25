@@ -163,10 +163,29 @@
       "name": "Administrador IEPC",
       "email": "admin@iepc.com",
       "role": "ADMIN",
-      "passwordHash": "48633eba6e72b291b02a4a880cce20dc4b6c444584320d43a83312f679526afa4e05ee0754a735725eba23087d3d5de974ba9acda8a7747cc2e5367aa6338098",
-      "salt": "fec5d3dd7943ffe98a0fafedb01a967b",
+      "passwordHash": "67e62735e7c55d6f948d109951e3af4c1e00017e6a8b7260578502f8b9eb9075e51b5a882b678f8d325152e945ab87c0809e6de18044370b741e13bb62a132b4",
+      "salt": "d651e0edc51e02c62919edaa0bd52f84",
       "createdAt": "2026-09-20T12:00:00.000Z"
     }
   ],
-  "registrations": []
+  "registrations": [
+    {
+      "id": "reg-1790377032980-681",
+      "code": "EVT-26-9EC5F1",
+      "name": "Teste Usuario",
+      "email": "teste@gmail.com",
+      "phone": "",
+      "birthDate": "2000-01-01",
+      "age": 26,
+      "bringingGuests": false,
+      "guestsCount": 0,
+      "accompanyingCount": 0,
+      "city": "São Paulo",
+      "state": "SP",
+      "ticketType": "Membro IEPC",
+      "createdAt": "2026-09-25T22:57:12.980Z",
+      "status": "Confirmado",
+      "termsAccepted": true
+    }
+  ]
 }
