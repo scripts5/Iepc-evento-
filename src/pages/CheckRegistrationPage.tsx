@@ -229,7 +229,7 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
 
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                   <div>
-                    <span className="text-slate-400 text-xs font-semibold uppercase block">Categoria</span>
+                    <span className="text-slate-400 text-xs font-semibold uppercase block">Denominação</span>
                     <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs capitalize inline-block mt-0.5">
                       {registration.ticketType}
                     </span>

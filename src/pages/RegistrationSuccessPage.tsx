@@ -144,6 +144,15 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
             </span>
           </div>
 
+          {registration.ticketType && (
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
+              <span className="font-semibold text-slate-500">Denominação:</span>
+              <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md text-xs sm:text-sm capitalize">
+                {registration.ticketType}
+              </span>
+            </div>
+          )}
+
           <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
             <span className="font-semibold text-slate-500">Quantas pessoas vai levar:</span>
             <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -178,8 +187,9 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
 
           <div className="flex items-center justify-between">
             <span className="font-semibold text-slate-500">Status no Sistema:</span>
-            <span className="font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full text-xs">
-              Login e Cadastro Concluídos
+            <span className="font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full text-xs flex items-center gap-1.5 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Autorizado e Confirmado
             </span>
           </div>
         </div>

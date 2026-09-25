@@ -225,8 +225,8 @@ export const AdminBadgesPage: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRegistrations.map((attendee) => {
-            const isGuest = attendee.ticketType === 'jovem-convidado';
-            const isLeader = attendee.ticketType === 'lideranca-apoio';
+            const isGuest = attendee.ticketType === 'jovem-convidado' || attendee.ticketType?.toLowerCase().includes('convidado');
+            const isLeader = attendee.ticketType === 'lideranca-apoio' || attendee.ticketType?.toLowerCase().includes('lider') || attendee.ticketType?.toLowerCase().includes('volunt');
 
             return (
               <div
@@ -269,10 +269,12 @@ export const AdminBadgesPage: React.FC = () => {
                         }`}
                       >
                         {attendee.ticketType === 'jovem-iepc'
-                          ? 'Jovem IEPC'
+                          ? 'Membro IEPC'
                           : attendee.ticketType === 'jovem-convidado'
-                          ? 'Jovem Convidado'
-                          : 'Liderança & Apoio'}
+                          ? 'Convidado'
+                          : attendee.ticketType === 'lideranca-apoio'
+                          ? 'Liderança & Apoio'
+                          : (attendee.ticketType || 'Participante')}
                       </span>
                     </div>
 

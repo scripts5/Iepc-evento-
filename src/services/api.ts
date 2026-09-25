@@ -128,10 +128,10 @@ export const api = {
       city: data.city || 'São Paulo',
       state: data.state || 'SP',
       organization: data.organization || 'IEPC',
-      ticketType: data.ticketType || 'jovem-iepc',
+      ticketType: data.ticketType?.trim() || 'Membro IEPC',
       notes: data.notes || '',
       createdAt: new Date().toISOString(),
-      status: 'Inscrito',
+      status: 'Confirmado',
       termsAccepted: !!data.termsAccepted,
       guestsCount: data.guestsCount || 0,
       guestsNames: data.guestsNames || '',
@@ -270,7 +270,7 @@ export const api = {
   async adminLogin(email: string, password: string): Promise<{ token: string; user: AuthUser }> {
     const cleanPass = (password || '').trim();
     const rawEmail = (email || '').trim();
-    const emailToUse = rawEmail || 'administrador@gmail.com';
+    const emailToUse = rawEmail || 'administrador@iepc.com.br';
 
     try {
       const res = await request<{ message: string; token: string; user: AuthUser }>('/api/auth/login', {
@@ -286,16 +286,17 @@ export const api = {
       console.warn('API login failed or unavailable, checking offline admin master credentials:', err);
     }
 
-    // Offline / Vercel fallback validation
+    // Offline / fallback validation
+    const lowerPass = cleanPass.toLowerCase();
     const savedLocalPass = localStorage.getItem('eventpass_admin_password');
-    const isMaster = cleanPass === 'iepc' || cleanPass === 'admin' || cleanPass === 'iepc2026' || (savedLocalPass && cleanPass === savedLocalPass);
+    const isMaster = lowerPass === 'cpei' || lowerPass === 'iepc' || lowerPass === 'admin' || lowerPass === 'iepc2026' || (savedLocalPass && cleanPass === savedLocalPass);
     if (!isMaster) {
-      throw new Error('Senha incorreta. A senha de acesso ao painel da IEPC é iepc.');
+      throw new Error('Senha incorreta. A senha para acessar é cpei.');
     }
 
     const fallbackUser: AuthUser = {
       id: 'usr-admin-iepc',
-      name: 'Administrador IEPC',
+      name: 'Liderança Administrativa IEPC',
       email: emailToUse,
       role: 'ADMIN',
     };

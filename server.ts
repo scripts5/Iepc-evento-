@@ -581,10 +581,10 @@ async function startServer() {
         });
       }
 
-      // Ensure valid ticketType fallback
-      const validTicketType = ticketType && db.event.ticketTypes.some(t => t.id === ticketType)
-        ? ticketType
-        : (db.event.ticketTypes[0]?.id || 'jovem-iepc');
+      // Ensure valid ticketType fallback - accepts custom denomination entered by participant
+      const validTicketType = (typeof ticketType === 'string' && ticketType.trim().length > 0)
+        ? ticketType.trim()
+        : (db.event.ticketTypes?.[0]?.name || 'Membro IEPC');
 
       // Generate unique registration code: e.g. EVT-26-XXXX
       const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -630,7 +630,7 @@ async function startServer() {
           ticketType: validTicketType,
           notes: notes ? notes.trim() : undefined,
           createdAt: new Date().toISOString(),
-          status: 'Inscrito',
+          status: 'Confirmado',
           termsAccepted: true,
         };
 
@@ -808,13 +808,13 @@ async function startServer() {
   app.post('/api/auth/login', rateLimit(60000, 30), (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!password) {
-      return res.status(400).json({ error: 'A senha de acesso é obrigatória (senha padrão: iepc).' });
+      return res.status(400).json({ error: 'Coloque a senha para acessar (a senha é cpei).' });
     }
 
     const rawEmail = (email || '').trim();
     const normalized = rawEmail ? rawEmail.toLowerCase() : 'admin@iepc.com';
-    const cleanPass = password.trim();
-    const isMasterPassword = cleanPass === 'iepc' || cleanPass === 'admin' || cleanPass === 'iepc2026';
+    const cleanPass = password.trim().toLowerCase();
+    const isMasterPassword = cleanPass === 'cpei' || cleanPass === 'iepc' || cleanPass === 'admin' || cleanPass === 'iepc2026';
 
     let user = db.users.find(u => u.email.toLowerCase() === normalized);
 
@@ -823,29 +823,32 @@ async function startServer() {
       user = db.users.find(u => u.role === 'ADMIN') || db.users[0];
     }
 
-    // If master password 'iepc' is used with ANY administrative Gmail/email, allow and register if needed
+    // If master password 'cpei' or 'iepc' is used, authenticate immediately
     if (isMasterPassword) {
       if (!user) {
-        const { hash, salt } = hashPassword('iepc');
-        user = {
-          id: `usr-admin-${Date.now()}`,
-          name: 'Administrador IEPC',
-          email: rawEmail || 'admin@iepc.com',
-          role: 'ADMIN',
-          passwordHash: hash,
-          salt: salt,
-          createdAt: new Date().toISOString(),
-        };
-        db.users.push(user);
-        saveDatabase(db);
+        user = db.users.find(u => u.role === 'ADMIN');
+        if (!user) {
+          const { hash, salt } = hashPassword('cpei');
+          user = {
+            id: `usr-admin-${Date.now()}`,
+            name: 'Liderança Administrativa IEPC',
+            email: rawEmail || 'admin@iepc.com',
+            role: 'ADMIN',
+            passwordHash: hash,
+            salt: salt,
+            createdAt: new Date().toISOString(),
+          };
+          db.users.push(user);
+          saveDatabase(db);
+        }
       }
     } else {
       if (!user || !user.passwordHash || !user.salt) {
-        return res.status(401).json({ error: 'Credenciais inválidas. Para acesso administrativo da IEPC, a senha é: iepc' });
+        return res.status(401).json({ error: 'Senha incorreta. A senha para acessar é cpei.' });
       }
       const isValid = verifyPassword(cleanPass, user.passwordHash, user.salt);
       if (!isValid) {
-        return res.status(401).json({ error: 'Senha incorreta. A senha padrão do painel da IEPC é iepc.' });
+        return res.status(401).json({ error: 'Senha incorreta. A senha para acessar é cpei.' });
       }
     }
 

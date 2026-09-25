@@ -48,7 +48,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     city: '',
     state: 'SP',
     organization: '',
-    ticketType: activeEvent.ticketTypes[0]?.id || 'jovem-iepc',
+    ticketType: '',
     notes: '',
     termsAccepted: false,
   });
@@ -69,19 +69,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-
-  // Sync ticketType whenever event finishes loading
-  useEffect(() => {
-    if (activeEvent?.ticketTypes && activeEvent.ticketTypes.length > 0) {
-      setFormData(prev => {
-        const hasMatch = activeEvent.ticketTypes.some(t => t.id === prev.ticketType);
-        if (!hasMatch) {
-          return { ...prev, ticketType: activeEvent.ticketTypes[0].id };
-        }
-        return prev;
-      });
-    }
-  }, [activeEvent]);
 
   const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
 
@@ -129,8 +116,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
       errs.state = 'Selecione o estado.';
     }
 
-    if (!formData.ticketType) {
-      errs.ticketType = 'Selecione a categoria de inscrição.';
+    if (!formData.ticketType || !formData.ticketType.trim()) {
+      errs.ticketType = 'Por favor, informe sua denominação (exemplo: convidado, membro, voluntários... etc).';
     }
 
     if (!formData.termsAccepted) {
@@ -481,44 +468,58 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
             </div>
           </div>
 
-          {/* Section: Categoria de Inscrição */}
+          {/* Section: Qual sua denominação */}
           <div className="pt-4 border-t border-slate-100 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              2. Categoria de Inscrição *
-            </h3>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label htmlFor="ticketType" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  2. Qual sua denominação *
+                </label>
+                <span className="text-[11px] text-indigo-600 font-semibold">Campo obrigatório</span>
+              </div>
+              <div className="relative">
+                <input
+                  id="ticketType"
+                  type="text"
+                  value={formData.ticketType}
+                  onChange={(e) => {
+                    setFormData({ ...formData, ticketType: e.target.value });
+                    if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
+                  }}
+                  placeholder="exemplo: convidado, membro,voluntários... etc"
+                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
+                    errors.ticketType
+                      ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
+                      : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
+                  }`}
+                />
+                <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              </div>
+              {errors.ticketType && (
+                <p className="text-xs text-rose-600 mt-1">{errors.ticketType}</p>
+              )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {activeEvent.ticketTypes.map((ticket) => {
-                const isSelected = formData.ticketType === ticket.id;
-                return (
-                  <label
-                    key={ticket.id}
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start justify-between gap-3 ${
-                      isSelected
-                        ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-500/20'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
+              {/* Sugestões rápidas para facilitar o preenchimento */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                <span className="text-[11px] text-slate-400 mr-1 font-medium">Sugestões rápidas:</span>
+                {['Membro', 'Convidado', 'Voluntários', 'Liderança', 'IEPC'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, ticketType: suggestion });
+                      if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
+                    }}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                      formData.ticketType.toLowerCase() === suggestion.toLowerCase()
+                        ? 'bg-indigo-600 text-white border-indigo-600 font-semibold shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50'
                     }`}
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="ticketType"
-                          value={ticket.id}
-                          checked={isSelected}
-                          onChange={() => setFormData({ ...formData, ticketType: ticket.id })}
-                          className="text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="text-sm font-bold text-slate-900">{ticket.name}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 pl-5 leading-relaxed">{ticket.description}</p>
-                    </div>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md shrink-0">
-                      {ticket.price === 0 ? 'Grátis' : `R$ ${ticket.price}`}
-                    </span>
-                  </label>
-                );
-              })}
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

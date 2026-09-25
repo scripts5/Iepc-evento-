@@ -140,7 +140,7 @@ export const VoucherModal: React.FC<VoucherModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200/60">
                   <div>
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                      Tipo de Ingresso
+                      Denominação / Tipo
                     </label>
                     <span className="inline-block mt-0.5 px-2 py-0.5 bg-indigo-100/70 text-indigo-800 rounded font-semibold text-xs capitalize">
                       {registration.ticketType}
