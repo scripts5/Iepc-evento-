@@ -100,7 +100,7 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
     const subject = encodeURIComponent(`Comprovante de Inscrição IEPC 2026 - Código: ${registration.code}`);
     const body = encodeURIComponent(
       `A paz do Senhor!\n\n` +
-      `Comprovante Oficial de Inscrição para a Conferência de Jovens da IEPC 2026:\n\n` +
+      `Comprovante Oficial de Inscrição para o Evento dos Jovens da IEPC 2026:\n\n` +
       `• Participante: ${registration.name}\n` +
       `• Código Oficial: ${registration.code}\n` +
       `• Categoria: ${registration.ticketType}\n` +
@@ -130,7 +130,7 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
             Seu login foi concluído!
           </h1>
           <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-            Sua vaga no <strong>{event?.name || 'Conferência de Jovens IEPC 2026'}</strong> está confirmada no sistema. Guarde seu código de identificação e QR Code abaixo.
+            Sua vaga no <strong>{event?.name || 'Evento dos Jovens IEPC 2026'}</strong> está confirmada no sistema. Guarde seu código de identificação e QR Code abaixo.
           </p>
         </div>
 
@@ -195,22 +195,6 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
               <span className="font-semibold text-slate-500">Denominação:</span>
               <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md text-xs sm:text-sm capitalize">
                 {registration.ticketType}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
-            <span className="font-semibold text-slate-500">Quantas pessoas vai levar:</span>
-            <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-              {registration.accompanyingCount ?? registration.guestsCount ?? 0} pessoa(s) acompanhando
-            </span>
-          </div>
-
-          {(registration.accompanyingNames || registration.guestsNames) && (
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
-              <span className="font-semibold text-slate-500">Quem irá levar:</span>
-              <span className="font-medium text-slate-800 text-right max-w-[60%]">
-                {registration.accompanyingNames || registration.guestsNames}
               </span>
             </div>
           )}
@@ -283,7 +267,7 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
             <span>ℹ️</span> Mini Crachá e Credencial de Entrada:
           </p>
           <p className="text-indigo-800/90 leading-relaxed">
-            Seu mini crachá oficial personalizado (com nome, Gmail, idade e convidados) será impresso e disponibilizado pelos <strong>Administradores da IEPC</strong> na recepção durante o check-in presencial no evento.
+            Seu mini crachá oficial personalizado (com nome, Gmail e congregação) será impresso e disponibilizado pelos <strong>Administradores da IEPC</strong> na recepção durante o check-in presencial no evento.
           </p>
         </div>
 

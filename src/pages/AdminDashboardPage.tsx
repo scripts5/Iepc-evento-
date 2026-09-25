@@ -11,6 +11,7 @@ import {
   ArrowRight,
   AlertCircle,
   Sparkles,
+  Settings,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -26,6 +27,7 @@ import {
 import { api } from '../services/api.ts';
 import { DashboardStats, Registration } from '../types/index.ts';
 import { useToast } from '../context/ToastContext.tsx';
+import { useEvent } from '../context/EventContext.tsx';
 import { StatusBadge } from '../components/common/Badge.tsx';
 import { AdminRandomWidget } from '../components/admin/AdminRandomWidget.tsx';
 import { AdminDataVisualization } from '../components/admin/AdminDataVisualization.tsx';
@@ -36,6 +38,7 @@ interface AdminDashboardPageProps {
 
 export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNavigate }) => {
   const { showToast } = useToast();
+  const { event } = useEvent();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recent, setRecent] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +133,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
+            onClick={() => onNavigate('/admin/configuracoes')}
+            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-100 bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <Settings className="w-4 h-4 text-indigo-400" />
+            Configurar Evento (Nome & Status)
+          </button>
+          <button
+            type="button"
             onClick={() => onNavigate('/admin/checkin')}
             className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-colors"
           >
@@ -145,6 +156,43 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
             Exportar CSV
           </button>
         </div>
+      </div>
+
+      {/* Quick Event Info & Status Banner */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+            <Settings className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900">
+                {event?.name || 'Evento dos Jovens IEPC 2026'}
+              </h3>
+              <span
+                className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
+                  event?.isRegistrationOpen
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}
+              >
+                {event?.isRegistrationOpen ? '● Inscrições ABERTAS' : '● Inscrições ENCERRADAS / FECHADO'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">
+              {event?.startDate?.includes('2026-11') ? 'Novembro / 2026' : event?.startDate} • {event?.locationName || 'Templo Sede IEPC'} • Capacidade Máxima: {event?.maxCapacity || 600} vagas
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('/admin/configuracoes')}
+          className="px-4 py-2 text-xs font-bold text-indigo-700 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-colors cursor-pointer flex items-center gap-2 shrink-0 self-start md:self-auto"
+        >
+          <Settings className="w-3.5 h-3.5" />
+          Alterar Nome, Limite ou Fechar Evento
+        </button>
       </div>
 
       {/* Metric Cards Grid */}

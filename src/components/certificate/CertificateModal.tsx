@@ -70,7 +70,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     title: 'CERTIFICADO DE PARTICIPAÇÃO',
     subtitle: 'A Igreja Evangélica Pentecostal Cristã (IEPC) certifica que',
     textTemplate:
-      'participou com louvor e dedicação da Conferência de Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
+      'participou com louvor e dedicação do Evento dos Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
     workloadHours: '8 horas',
     signatoryName1: 'Pastor Presidente da IEPC',
     signatoryRole1: 'Liderança Pastoral Geral',
@@ -84,7 +84,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
   const safeEvent = event || {};
   const certCode = registration.certificateCode || `CERT-${registration.code.replace('EVT-', '')}`;
-  const eventName = safeEvent.name || 'Conferência de Jovens IEPC 2026';
+  const eventName = safeEvent.name || 'Evento dos Jovens IEPC 2026';
   
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Mês de Novembro / 2026 (Dia a definir)';
@@ -549,25 +549,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       <Building className="w-3 h-3" />
                       {registration.organization || 'IEPC Templo Sede'}
                     </span>
-                  </div>
-
-                  {/* Quem irá levar e quantas pessoas */}
-                  <div className="w-full bg-slate-50 border border-slate-200/90 rounded-xl p-2.5 text-left text-[11px] space-y-1">
-                    <div className="flex items-center justify-between text-slate-700">
-                      <span className="font-bold text-slate-500">Quantas pessoas vai levar:</span>
-                      <span className="font-extrabold text-indigo-700 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
-                        {registration.accompanyingCount ?? registration.guestsCount ?? 0} pessoa(s)
-                      </span>
-                    </div>
-
-                    <div className="text-slate-700 pt-0.5">
-                      <span className="font-bold text-slate-500 block text-[10px] uppercase tracking-wider">
-                        Quem irá levar:
-                      </span>
-                      <span className="font-medium text-slate-900 block truncate">
-                        {registration.accompanyingNames || registration.guestsNames || 'Apenas o próprio jovem'}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Category Pill */}

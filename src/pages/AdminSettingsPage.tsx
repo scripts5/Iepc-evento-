@@ -52,11 +52,25 @@ export const AdminSettingsPage: React.FC = () => {
 
   const [saving, setSaving] = useState(false);
 
+  React.useEffect(() => {
+    if (event) {
+      setFormData(event);
+    }
+  }, [event]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSaving(true);
-      await updateEvent(formData);
+      await updateEvent({
+        ...formData,
+        tagline: formData.tagline || formData.slogan || '',
+        slogan: formData.slogan || formData.tagline || '',
+        time: formData.time || formData.timeSchedule || '',
+        timeSchedule: formData.timeSchedule || formData.time || '',
+        locationAddress: formData.locationAddress || formData.address || '',
+        address: formData.address || formData.locationAddress || '',
+      });
       showToast('Configurações do evento atualizadas com sucesso!', 'success');
     } catch (err: any) {
       showToast(err.message || 'Erro ao salvar configurações.', 'error');
@@ -133,8 +147,8 @@ export const AdminSettingsPage: React.FC = () => {
               <label className="block font-semibold text-slate-700 mb-1">Slogan / Chamada Principal</label>
               <input
                 type="text"
-                value={formData.slogan}
-                onChange={(e) => setFormData({ ...formData, slogan: e.target.value })}
+                value={formData.tagline || formData.slogan || ''}
+                onChange={(e) => setFormData({ ...formData, slogan: e.target.value, tagline: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500"
               />
             </div>
@@ -145,6 +159,17 @@ export const AdminSettingsPage: React.FC = () => {
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full p-3 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500 resize-none"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block font-semibold text-slate-700 mb-1">Informações Importantes (Avisos de gratuidade, bíblia, etc.)</label>
+              <textarea
+                rows={2}
+                value={formData.importantInfo || ''}
+                onChange={(e) => setFormData({ ...formData, importantInfo: e.target.value })}
+                placeholder="Ex: Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever..."
                 className="w-full p-3 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500 resize-none"
               />
             </div>

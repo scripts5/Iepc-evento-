@@ -134,10 +134,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             <button
               type="button"
               onClick={() => handleNav('/admin')}
-              title="Área do Administrador"
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+              title="Área do Administrador (Configurar Evento e Gerenciar Inscrições)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-colors cursor-pointer"
             >
-              <Shield className="w-5 h-5" />
+              <Shield className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Painel ADM</span>
             </button>
           </div>
 

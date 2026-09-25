@@ -93,11 +93,7 @@ function AppContent() {
     } else if (currentPath === '/admin/relatorios') {
       adminComponent = <AdminReportsPage />;
     } else if (currentPath === '/admin/configuracoes') {
-      adminComponent = isAdmin ? (
-        <AdminSettingsPage />
-      ) : (
-        <AdminDashboardPage onNavigate={navigate} />
-      );
+      adminComponent = <AdminSettingsPage />;
     } else if (currentPath === '/admin/usuarios') {
       adminComponent = isAdmin ? <AdminUsersPage /> : <AdminDashboardPage onNavigate={navigate} />;
     } else {

@@ -45,29 +45,57 @@ function getAuthToken(): string | null {
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
+  const method = (options.method || 'GET').toUpperCase();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
+
+  // Only attach Content-Type header on requests that have a payload
+  if (method !== 'GET' && method !== 'HEAD' && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('application/json')) {
-    throw new Error(`Servidor não retornou JSON (${response.status})`);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (err: any) {
+    console.warn(`[Network] Falha ao conectar em ${url}:`, err);
+    throw new Error('Falha de conexão. Verifique sua rede e tente novamente.');
   }
 
-  const data = await response.json().catch(() => ({}));
+  // If mobile carrier proxy returns 405 on PUT/PATCH/DELETE, auto retry via POST with override
+  if (response.status === 405 && (method === 'PUT' || method === 'PATCH' || method === 'DELETE')) {
+    try {
+      const retryHeaders = {
+        ...headers,
+        'X-HTTP-Method-Override': method,
+      };
+      response = await fetch(url, {
+        ...options,
+        method: 'POST',
+        headers: retryHeaders,
+      });
+    } catch {
+      // Keep initial response
+    }
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  let data: any = {};
+  if (contentType.includes('application/json')) {
+    data = await response.json().catch(() => ({}));
+  }
 
   if (!response.ok) {
-    throw new Error(data.error || data.message || `Erro na requisição (${response.status})`);
+    const errorMsg = data.error || data.message || `Erro na comunicação com o servidor (${response.status})`;
+    throw new Error(errorMsg);
   }
 
   return data as T;

@@ -166,7 +166,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Inscrições Encerradas</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            As inscrições para a <strong>{event?.name || 'Conferência de Jovens IEPC'}</strong> atingiram o limite máximo de participantes ou foram finalizadas pela coordenação.
+            As inscrições para o <strong>{event?.name || 'Evento dos Jovens IEPC 2026'}</strong> atingiram o limite máximo de participantes ou foram finalizadas pela coordenação.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
@@ -212,7 +212,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
             Formulário de Inscrição dos Jovens
           </h1>
           <p className="text-sm text-slate-600">
-            Garanta sua vaga na <strong>{event?.name || 'Conferência de Jovens IEPC 2026'}</strong>. Inscrição 100% gratuita! Seu mini crachá e QR Code de entrada são gerados imediatamente.
+            Garanta sua vaga no <strong>{event?.name || 'Evento dos Jovens IEPC 2026'}</strong>. Inscrição 100% gratuita! Seu mini crachá e QR Code de entrada são gerados imediatamente.
           </p>
         </div>
 
@@ -372,53 +372,6 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
                     className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden"
                   />
                   <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            {/* Acompanhantes / Convidados */}
-            <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Quem você irá levar? (Amigos e Convidados)
-                </span>
-                <span className="text-[11px] font-medium text-indigo-600">Traga amigos para o evento!</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label htmlFor="guestsCount" className="block text-xs font-semibold text-slate-700 mb-1">
-                    Quantas pessoas vai levar?
-                  </label>
-                  <input
-                    id="guestsCount"
-                    type="number"
-                    min="0"
-                    max="50"
-                    value={formData.guestsCount}
-                    onChange={(e) => {
-                      const count = Math.max(0, parseInt(e.target.value, 10) || 0);
-                      setFormData({ ...formData, guestsCount: count, bringingGuests: count > 0 });
-                    }}
-                    placeholder="0"
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden font-bold text-slate-800"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-0.5">0 se for apenas você</p>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label htmlFor="guestsNames" className="block text-xs font-semibold text-slate-700 mb-1">
-                    Quem irá levar? (Nome dos convidados)
-                  </label>
-                  <input
-                    id="guestsNames"
-                    type="text"
-                    value={formData.guestsNames}
-                    onChange={(e) => setFormData({ ...formData, guestsNames: e.target.value })}
-                    placeholder="Ex: Matheus Lima, Lucas Pereira e Daniel..."
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-0.5">Separe os nomes por vírgula se for mais de um</p>
                 </div>
               </div>
             </div>

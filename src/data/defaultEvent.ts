@@ -3,7 +3,7 @@ import { EventConfig, CertificateConfig } from '../types/index.ts';
 export const defaultCertificateConfig: CertificateConfig = {
   title: 'CERTIFICADO DE PARTICIPAÇÃO',
   subtitle: 'A Igreja Evangélica Pentecostal Cristã (IEPC) certifica que',
-  textTemplate: 'participou com louvor e dedicação da Conferência de Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
+  textTemplate: 'participou com louvor e dedicação do Evento dos Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
   workloadHours: '8 horas',
   signatoryName1: 'Pastor Presidente da IEPC',
   signatoryRole1: 'Liderança Pastoral Geral',
@@ -17,7 +17,7 @@ export const defaultCertificateConfig: CertificateConfig = {
 
 export const defaultEventData: EventConfig & { registeredCount: number; isCapacityFull: boolean } = {
   id: 'evt-jovens-iepc-2026',
-  name: 'Conferência de Jovens IEPC 2026',
+  name: 'Evento dos Jovens IEPC 2026',
   tagline: 'Juventude com Propósito • Avivamento, Adoração, Fé e Comunhão',
   description: 'O grande Encontro de Jovens da Igreja Evangélica Pentecostal Cristã (IEPC) reunirá a juventude e adolescentes para momentos marcantes na presença de Deus. Teremos louvor ao vivo com o Ministério de Louvor Jovem IEPC, ministração bíblica direcionada para a vida dos jovens, testemunhos, oração especial no altar, dinâmicas de acolhimento e confraternização. Um ambiente caloroso e transformador aberto a todos os membros e visitantes.',
   importantInfo: 'Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no mês de Novembro de 2026 (dia exato a ser anunciado nos cultos e atualizado aqui no site). Traga sua Bíblia, venha com coração aberto e convide seus amigos!',

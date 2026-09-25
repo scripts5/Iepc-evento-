@@ -102,7 +102,7 @@ export function buildVoucherEmailHtml(reg: RegistrationEmailData): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscrição Confirmada - Conferência de Jovens IEPC 2026</title>
+  <title>Inscrição Confirmada - Evento dos Jovens IEPC 2026</title>
   <style>
     body {
       margin: 0;
@@ -290,7 +290,7 @@ export function buildVoucherEmailHtml(reg: RegistrationEmailData): string {
       <!-- Top Banner -->
       <div class="header">
         <div class="header-badge">✓ Inscrição Oficial Confirmada</div>
-        <h1>Conferência de Jovens IEPC 2026</h1>
+        <h1>Evento dos Jovens IEPC 2026</h1>
         <p>Juventude com Propósito • Avivamento, Adoração, Fé e Comunhão</p>
       </div>
 
@@ -406,7 +406,7 @@ export async function sendRegistrationEmail(
       };
     }
 
-    const fromAddress = process.env.SMTP_FROM || '"Conferência de Jovens IEPC" <eventos@iepc.com.br>';
+    const fromAddress = process.env.SMTP_FROM || '"Evento dos Jovens IEPC" <eventos@iepc.com.br>';
     const subject = `🎉 Inscrição Confirmada! Comprovante & QR Code - ${reg.code}`;
     const html = buildVoucherEmailHtml(reg);
 

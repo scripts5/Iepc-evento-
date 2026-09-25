@@ -83,7 +83,7 @@ export const VoucherModal: React.FC<VoucherModalProps> = ({
                 Ingresso Oficial
               </p>
               <h3 className="text-xl font-bold mt-1 text-white leading-snug">
-                {event?.name || 'Conferência de Jovens IEPC 2026'}
+                {event?.name || 'Evento dos Jovens IEPC 2026'}
               </h3>
 
               <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-2 gap-3 text-xs text-slate-300">

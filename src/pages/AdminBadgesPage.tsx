@@ -247,7 +247,7 @@ export const AdminBadgesPage: React.FC = () => {
                   }`}
                 >
                   <span className="text-[10px] font-extrabold uppercase tracking-widest block opacity-90">
-                    {event?.name || 'CONFERÊNCIA DE JOVENS IEPC 2026'}
+                    {event?.name || 'EVENTO DOS JOVENS IEPC 2026'}
                   </span>
                   <span className="text-xs font-black tracking-wide block mt-0.5">
                     MINI CRACHÁ OFICIAL

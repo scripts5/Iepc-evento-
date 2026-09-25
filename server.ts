@@ -23,7 +23,7 @@ const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || 'event-management-sec
 export const defaultCertificateConfig: CertificateConfig = {
   title: 'CERTIFICADO DE PARTICIPAÇÃO',
   subtitle: 'A Igreja Evangélica Pentecostal Cristã (IEPC) certifica que',
-  textTemplate: 'participou com louvor e dedicação da Conferência de Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
+  textTemplate: 'participou com louvor e dedicação do Evento dos Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
   workloadHours: '8 horas',
   signatoryName1: 'Pastor Presidente da IEPC',
   signatoryRole1: 'Liderança Pastoral Geral',
@@ -398,6 +398,15 @@ function requireAdminRole(req: AuthenticatedRequest, res: Response, next: NextFu
 async function startServer() {
   const app = express();
   app.use(express.json());
+
+  // Support HTTP Method Override for mobile carriers and proxies that block PUT/PATCH/DELETE
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    const override = req.headers['x-http-method-override'];
+    if (override && typeof override === 'string') {
+      req.method = override.toUpperCase();
+    }
+    next();
+  });
 
   // Helper to generate QR Code Data URL
   async function getQRCodeDataUrl(code: string): Promise<string> {
@@ -1067,8 +1076,8 @@ async function startServer() {
     });
   });
 
-  // Edit Attendee Details
-  app.put('/api/admin/registrations/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  // Edit Attendee Details (accepts PUT and POST)
+  const handleEditAttendee = (req: AuthenticatedRequest, res: Response) => {
     const index = db.registrations.findIndex(r => r.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: 'Inscrição não encontrada.' });
 
@@ -1107,10 +1116,12 @@ async function startServer() {
     saveDatabase(db);
 
     res.json({ message: 'Inscrição atualizada com sucesso!', registration: current });
-  });
+  };
+  app.put('/api/admin/registrations/:id', requireAuth, handleEditAttendee);
+  app.post('/api/admin/registrations/:id', requireAuth, handleEditAttendee);
 
-  // Change Attendee Status
-  app.patch('/api/admin/registrations/:id/status', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  // Change Attendee Status (accepts PATCH and POST)
+  const handleStatusChange = (req: AuthenticatedRequest, res: Response) => {
     const index = db.registrations.findIndex(r => r.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: 'Inscrição não encontrada.' });
 
@@ -1136,10 +1147,12 @@ async function startServer() {
     saveDatabase(db);
 
     res.json({ message: `Status alterado para ${status} com sucesso!`, registration: current });
-  });
+  };
+  app.patch('/api/admin/registrations/:id/status', requireAuth, handleStatusChange);
+  app.post('/api/admin/registrations/:id/status', requireAuth, handleStatusChange);
 
-  // Delete Attendee (ADMIN role only)
-  app.delete('/api/admin/registrations/:id', requireAuth, requireAdminRole, (req: AuthenticatedRequest, res: Response) => {
+  // Delete Attendee (ADMIN role only, accepts DELETE and POST)
+  const handleDeleteAttendee = (req: AuthenticatedRequest, res: Response) => {
     const index = db.registrations.findIndex(r => r.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: 'Inscrição não encontrada.' });
 
@@ -1147,7 +1160,9 @@ async function startServer() {
     saveDatabase(db);
 
     res.json({ message: `Inscrição de ${deleted[0].name} excluída com sucesso.` });
-  });
+  };
+  app.delete('/api/admin/registrations/:id', requireAuth, requireAdminRole, handleDeleteAttendee);
+  app.post('/api/admin/registrations/:id/delete', requireAuth, requireAdminRole, handleDeleteAttendee);
 
   // ==========================================
   // CHECK-IN SYSTEM
@@ -1233,8 +1248,8 @@ async function startServer() {
   // EVENT SETTINGS & ADMIN MANAGEMENT
   // ==========================================
 
-  // Update Event Settings (ADMIN role only)
-  app.put('/api/event', requireAuth, requireAdminRole, (req: AuthenticatedRequest, res: Response) => {
+  // Update Event Settings (ADMIN role only, accepts both PUT and POST)
+  const handleUpdateEvent = (req: AuthenticatedRequest, res: Response) => {
     try {
       const updatedConfig: Partial<EventConfig> = req.body;
       db.event = {
@@ -1246,10 +1261,12 @@ async function startServer() {
     } catch (err: any) {
       res.status(500).json({ error: 'Erro ao salvar configurações do evento.' });
     }
-  });
+  };
+  app.put('/api/event', requireAuth, requireAdminRole, handleUpdateEvent);
+  app.post('/api/event', requireAuth, requireAdminRole, handleUpdateEvent);
 
-  // Update Certificate Template (ADMIN role only)
-  app.put('/api/admin/certificate/template', requireAuth, requireAdminRole, (req: AuthenticatedRequest, res: Response) => {
+  // Update Certificate Template (ADMIN role only, accepts both PUT and POST)
+  const handleUpdateCertTemplate = (req: AuthenticatedRequest, res: Response) => {
     try {
       const templateData = req.body;
       db.event.certificateConfig = {
@@ -1275,7 +1292,9 @@ async function startServer() {
     } catch (err: any) {
       res.status(500).json({ error: 'Erro ao salvar template de certificado.' });
     }
-  });
+  };
+  app.put('/api/admin/certificate/template', requireAuth, requireAdminRole, handleUpdateCertTemplate);
+  app.post('/api/admin/certificate/template', requireAuth, requireAdminRole, handleUpdateCertTemplate);
 
   // Export Attendees to CSV (with UTF-8 BOM for Microsoft Excel compatibility)
   app.get('/api/admin/export/csv', requireAuth, (req: AuthenticatedRequest, res: Response) => {
@@ -1439,6 +1458,12 @@ async function startServer() {
 
     saveDatabase(db);
     res.json({ message: 'Dados de demonstração restaurados com sucesso!' });
+  });
+
+  // Explicit catch-all for any unknown /api/* endpoint
+  // Ensures API requests NEVER fall through to Vite static middleware (which returns 405 HTML)
+  app.all('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({ error: `Endpoint '${req.method} ${req.path}' não encontrado.` });
   });
 
   // ==========================================

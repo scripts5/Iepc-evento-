@@ -51,12 +51,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPath, onNavigat
     { label: 'Check-in (Credenciamento)', path: '/admin/checkin', icon: QrCode },
     { label: 'Certificados Digitais', path: '/admin/certificados', icon: Award },
     { label: 'Relatórios & Exportação', path: '/admin/relatorios', icon: FileBarChart },
-    ...(isAdmin
-      ? [
-          { label: 'Configurações do Evento', path: '/admin/configuracoes', icon: Settings },
-          { label: 'Usuários & Permissões', path: '/admin/usuarios', icon: ShieldAlert },
-        ]
-      : []),
+    { label: 'Configurações do Evento', path: '/admin/configuracoes', icon: Settings },
+    ...(isAdmin ? [{ label: 'Usuários & Permissões', path: '/admin/usuarios', icon: ShieldAlert }] : []),
   ];
 
   const handlePasswordChange = async (e: React.FormEvent) => {
