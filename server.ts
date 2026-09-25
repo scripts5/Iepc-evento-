@@ -21,7 +21,7 @@ const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || 'event-management-sec
 
 export const defaultCertificateConfig: CertificateConfig = {
   title: 'CERTIFICADO DE PARTICIPAÇÃO',
-  subtitle: 'A Igreja Evangélica Pentecostal Casa de Deus (IEPC) certifica que',
+  subtitle: 'A Igreja Evangélica Pentecostal Cristã (IEPC) certifica que',
   textTemplate: 'participou com louvor e dedicação da Conferência de Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
   workloadHours: '8 horas',
   signatoryName1: 'Pastor Presidente da IEPC',
@@ -31,7 +31,7 @@ export const defaultCertificateConfig: CertificateConfig = {
   themeColor: '#4f46e5',
   borderStyle: 'gold',
   showQrCode: true,
-  institutionName: 'Igreja Evangélica Pentecostal Casa de Deus (IEPC) - Departamento de Jovens',
+  institutionName: 'Igreja Evangélica Pentecostal Cristã (IEPC) - Departamento de Jovens',
 };
 
 // Helper for password hashing using PBKDF2
@@ -85,12 +85,12 @@ const defaultEventConfig: EventConfig = {
   id: 'evt-jovens-iepc-2026',
   name: 'Conferência de Jovens IEPC 2026',
   tagline: 'Juventude com Propósito • Avivamento, Adoração, Fé e Comunhão',
-  description: 'O grande Encontro de Jovens da Igreja Evangélica Pentecostal Casa de Deus (IEPC) reunirá a juventude e adolescentes para momentos marcantes na presença de Deus. Teremos louvor ao vivo com o Ministério de Louvor Jovem IEPC, ministração bíblica direcionada para a vida dos jovens, testemunhos, oração especial no altar, dinâmicas de acolhimento e confraternização. Um ambiente caloroso e transformador aberto a todos os membros e visitantes.',
+  description: 'O grande Encontro de Jovens da Igreja Evangélica Pentecostal Cristã (IEPC) reunirá a juventude e adolescentes para momentos marcantes na presença de Deus. Teremos louvor ao vivo com o Ministério de Louvor Jovem IEPC, ministração bíblica direcionada para a vida dos jovens, testemunhos, oração especial no altar, dinâmicas de acolhimento e confraternização. Um ambiente caloroso e transformador aberto a todos os membros e visitantes.',
   importantInfo: 'Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no mês de Novembro de 2026 (dia exato a ser anunciado nos cultos e atualizado aqui no site). Traga sua Bíblia, venha com coração aberto e convide seus amigos!',
   startDate: '2026-11-01',
   endDate: '2026-11-30',
   time: '19h00 às 22h00',
-  locationName: 'Igreja Evangélica Pentecostal Casa de Deus (IEPC) - Templo Sede',
+  locationName: 'Igreja Evangélica Pentecostal Cristã (IEPC) - Templo Sede',
   locationAddress: 'Templo Sede da IEPC - Auditório Central dos Jovens',
   bannerUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80',
   maxCapacity: 600,
@@ -204,7 +204,7 @@ const defaultEventConfig: EventConfig = {
     email: 'jovens@iepc.com.br',
     phone: '(11) 3200-1000',
     instagram: '@jovens.iepc',
-    address: 'Igreja Evangélica Pentecostal Casa de Deus (IEPC) - Templo Sede',
+    address: 'Igreja Evangélica Pentecostal Cristã (IEPC) - Templo Sede',
   },
   termsText: 'Ao realizar a inscrição para o Encontro de Jovens da IEPC, você concorda em participar das atividades de comunhão com respeito cristão e autoriza o registro fotográfico institucional para as mídias da igreja.',
   privacyText: 'Seus dados pessoais são mantidos em sigilo e utilizados exclusivamente pela organização da IEPC para controle de presença, confecção do crachá e emissão do certificado de participação.',

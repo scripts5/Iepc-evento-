@@ -67,13 +67,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             </button>
             <button
               type="button"
-              onClick={() => handleNav('#programacao')}
-              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-            >
-              Programação
-            </button>
-            <button
-              type="button"
               onClick={() => handleNav('#informacoes')}
               className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
             >
@@ -181,13 +174,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
               className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
             >
               Sobre o Evento
-            </button>
-            <button
-              type="button"
-              onClick={() => handleNav('#programacao')}
-              className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-            >
-              Programação
             </button>
             <button
               type="button"

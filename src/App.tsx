@@ -20,6 +20,7 @@ import { AdminReportsPage } from './pages/AdminReportsPage.tsx';
 import { AdminSettingsPage } from './pages/AdminSettingsPage.tsx';
 import { AdminUsersPage } from './pages/AdminUsersPage.tsx';
 import { AdminCertificatesPage } from './pages/AdminCertificatesPage.tsx';
+import { AdminBadgesPage } from './pages/AdminBadgesPage.tsx';
 import { Registration } from './types/index.ts';
 
 function AppContent() {
@@ -83,6 +84,8 @@ function AppContent() {
 
     if (currentPath === '/admin/inscritos') {
       adminComponent = <AdminRegistrationsPage />;
+    } else if (currentPath === '/admin/crachas') {
+      adminComponent = <AdminBadgesPage />;
     } else if (currentPath === '/admin/checkin') {
       adminComponent = <AdminCheckinPage />;
     } else if (currentPath === '/admin/certificados') {

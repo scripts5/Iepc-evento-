@@ -13,7 +13,9 @@ import {
   CreditCard,
   Building,
   UserCheck,
-  FileText
+  FileText,
+  AlertCircle,
+  HelpCircle,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -40,6 +42,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'certificate' | 'badge'>(defaultView);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showConfirmDownload, setShowConfirmDownload] = useState(false);
 
   const certificateRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
   // Fallback configuration if not provided
   const config: CertificateConfig = certificateConfig || {
     title: 'CERTIFICADO DE PARTICIPAÇÃO',
-    subtitle: 'A Igreja Evangélica Pentecostal Casa de Deus (IEPC) certifica que',
+    subtitle: 'A Igreja Evangélica Pentecostal Cristã (IEPC) certifica que',
     textTemplate:
       'participou com louvor e dedicação da Conferência de Jovens da Igreja IEPC ({evento}), realizada em {data}, sediada em {local}, cumprindo a programação de comunhão, adoração e ministração com carga horária de {carga_horaria}.',
     workloadHours: '8 horas',
@@ -76,7 +79,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
     themeColor: '#4f46e5',
     borderStyle: 'gold',
     showQrCode: true,
-    institutionName: 'Igreja Evangélica Pentecostal Casa de Deus (IEPC) - Departamento de Jovens',
+    institutionName: 'Igreja Evangélica Pentecostal Cristã (IEPC) - Departamento de Jovens',
   };
 
   const safeEvent = event || {};
@@ -282,7 +285,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             {activeTab === 'certificate' ? (
               <button
                 id="btn-download-certificate-pdf"
-                onClick={downloadCertificatePdf}
+                onClick={() => setShowConfirmDownload(true)}
                 disabled={isGeneratingPdf}
                 className="inline-flex items-center gap-2 px-4 py-1.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md transition-colors disabled:opacity-50"
               >
@@ -594,6 +597,82 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal for Certificate PDF Download */}
+      {showConfirmDownload && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 text-slate-900 space-y-5">
+            <div className="flex items-start justify-between">
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
+                <Award className="w-6 h-6" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfirmDownload(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-black text-slate-900">
+                Confirmar Emissão do Certificado
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                Por favor, confirme os dados abaixo antes de gerar o documento oficial em alta resolução (PDF):
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs space-y-2.5">
+              <div>
+                <span className="text-slate-400 font-semibold uppercase text-[10px] block">Nome do Titular</span>
+                <span className="font-bold text-slate-900 text-sm">{registration.name}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-semibold uppercase text-[10px] block">Instituição Emissora</span>
+                <span className="font-medium text-slate-800">Igreja Evangélica Pentecostal Cristã (IEPC)</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-semibold uppercase text-[10px] block">Evento</span>
+                <span className="font-medium text-slate-800">{eventName}</span>
+              </div>
+              <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/60">
+                <div>
+                  <span className="text-slate-400 font-semibold uppercase text-[10px] block">Carga Horária</span>
+                  <span className="font-semibold text-indigo-600">{config.workloadHours || '8 horas'}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-slate-400 font-semibold uppercase text-[10px] block">Código de Autenticidade</span>
+                  <span className="font-mono font-bold text-slate-800">{certCode}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowConfirmDownload(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowConfirmDownload(false);
+                  downloadCertificatePdf();
+                }}
+                disabled={isGeneratingPdf}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-200 flex items-center gap-2 transition-all disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                Confirmar e Baixar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

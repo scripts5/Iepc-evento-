@@ -284,60 +284,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 3. PROGRAMAÇÃO / CRONOGRAMA */}
-      <section id="programacao" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
-            Cronograma Oficial
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Programação do Evento
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600">
-            Confira as palestras, painéis temáticos e intervalos programados para os dias do evento.
-          </p>
-        </div>
-
-        <div className="max-w-4xl mx-auto space-y-4">
-          {activeEvent.schedule.map((item, index) => (
-            <div
-              key={item.id || index}
-              className="bg-white border border-slate-200/80 hover:border-indigo-300 rounded-2xl p-5 sm:p-6 transition-all shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
-            >
-              <div className="shrink-0">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                  <Clock className="w-3.5 h-3.5" />
-                  {item.time}
-                </span>
-              </div>
-
-              <div className="flex-1 min-w-0 space-y-1">
-                <h3 className="text-base font-bold text-slate-900 leading-snug">
-                  {item.title}
-                </h3>
-                {item.speaker && (
-                  <p className="text-xs font-semibold text-indigo-600">
-                    {item.speaker}
-                  </p>
-                )}
-                {item.description && (
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    {item.description}
-                  </p>
-                )}
-              </div>
-
-              {item.location && (
-                <div className="shrink-0 text-xs font-medium text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                  {item.location}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. PERGUNTAS FREQUENTES (FAQ) */}
+      {/* 3. PERGUNTAS FREQUENTES (FAQ) */}
       <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-10">
           <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">
