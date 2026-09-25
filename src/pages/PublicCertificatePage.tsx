@@ -267,7 +267,7 @@ export const PublicCertificatePage: React.FC<PublicCertificatePageProps> = ({ on
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 flex items-center justify-between">
               <div>
                 <span className="font-semibold text-slate-800">Emissão Oficial:</span>{' '}
-                {result.certificateConfig.institutionName || 'Instituto de Educação & Inovação Tecnológica (IEPC)'}
+                {result.certificateConfig.institutionName || 'Igreja Evangélica Pentecostal Cristã (IEPC) - Departamento de Jovens'}
               </div>
               <div className="font-mono text-slate-500">
                 Código: {result.registration.certificateCode}

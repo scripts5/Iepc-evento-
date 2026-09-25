@@ -106,7 +106,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       Horário
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-800">
-                      {activeEvent.time}
+                      {activeEvent.time && activeEvent.time !== '19h00 às 22h00' ? activeEvent.time : 'Horário não definido'}
                     </span>
                   </div>
                 </div>

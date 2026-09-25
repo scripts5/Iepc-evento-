@@ -353,7 +353,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
                       ★
                     </div>
                     <span className="text-xs tracking-[0.25em] font-semibold text-amber-800 uppercase">
-                      {config.institutionName || 'Instituto de Educação & Inovação Tecnológica (IEPC)'}
+                      {config.institutionName || 'Igreja Evangélica Pentecostal Cristã (IEPC) - Departamento de Jovens'}
                     </span>
                   </div>
 

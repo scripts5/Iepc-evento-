@@ -89,7 +89,7 @@ const defaultEventConfig: EventConfig = {
   importantInfo: 'Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no mês de Novembro de 2026 (dia exato a ser anunciado nos cultos e atualizado aqui no site). Traga sua Bíblia, venha com coração aberto e convide seus amigos!',
   startDate: '2026-11-01',
   endDate: '2026-11-30',
-  time: '19h00 às 22h00',
+  time: 'Horário não definido',
   locationName: 'Igreja Evangélica Pentecostal Cristã (IEPC) - Templo Sede',
   locationAddress: 'Templo Sede da IEPC - Auditório Central dos Jovens',
   bannerUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80',
@@ -182,7 +182,7 @@ const defaultEventConfig: EventConfig = {
     {
       id: 'faq-3',
       question: 'Qual a data e horário exatos do evento?',
-      answer: 'O evento acontecerá no mês de Novembro de 2026, das 19h00 às 22h00. O dia específico será divulgado nos cultos e atualizado nesta página. Sua inscrição antecipada já garante sua vaga e confecção do crachá!',
+      answer: 'O evento acontecerá no mês de Novembro de 2026, com horário não definido (a ser informado pela liderança da igreja). O dia e o horário específicos serão divulgados nos cultos e atualizados nesta página. Sua inscrição antecipada já garante sua vaga e confecção do crachá!',
     },
     {
       id: 'faq-4',
@@ -330,6 +330,11 @@ function loadDatabase(): DatabaseSchema {
       if (!loaded.event || loaded.event.id === 'evt-2026-main' || (loaded.event.name && loaded.event.name.includes('Summit'))) {
         loaded.event = defaultEventConfig;
         loaded.registrations = generateDemoRegistrations();
+        hadUpdates = true;
+      }
+
+      if (!loaded.event.time || loaded.event.time === '19h00 às 22h00' || loaded.event.time === 'Horário a definir') {
+        loaded.event.time = 'Horário não definido';
         hadUpdates = true;
       }
 
