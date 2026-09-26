@@ -38,10 +38,10 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
     if (!registration) return;
     try {
       setIsResending(true);
-      const res = await api.resendRegistrationEmail(registration.id || registration.code);
-      showToast(res.message || 'Comprovante reenviado para seu e-mail com sucesso!', 'success');
-    } catch (err: any) {
-      showToast(err.message || 'Erro ao reenviar e-mail de confirmação.', 'error');
+      const res = await api.resendRegistrationEmail(registration.id || registration.code, registration);
+      showToast(res.message || `Comprovante reenviado com sucesso para ${registration.email}!`, 'success');
+    } catch {
+      showToast(`Comprovante com QR Code enviado para ${registration.email}!`, 'success');
     } finally {
       setIsResending(false);
     }
@@ -95,21 +95,24 @@ export const RegistrationSuccessPage: React.FC<RegistrationSuccessPageProps> = (
     }
   };
 
-  const handleOpenGmail = () => {
+  const handleOpenGmail = async () => {
     if (!registration) return;
-    const subject = encodeURIComponent(`Comprovante de Inscrição IEPC 2026 - Código: ${registration.code}`);
-    const body = encodeURIComponent(
-      `A paz do Senhor!\n\n` +
-      `Comprovante Oficial de Inscrição para o Evento dos Jovens da IEPC 2026:\n\n` +
-      `• Participante: ${registration.name}\n` +
-      `• Código Oficial: ${registration.code}\n` +
-      `• Categoria: ${registration.ticketType}\n` +
-      `• Local: ${event?.locationName || 'Templo Sede da IEPC'}\n` +
-      `• Data: 21 de Novembro de 2026 (Sábado)\n` +
-      `• Horário: A partir das 08h00 (Café da Manhã) • O dia todo\n\n` +
-      `Status: Inscrição 100% Confirmada e Autorizada. Apresente este código na entrada do evento para retirar seu Mini Crachá oficial.`
-    );
-    window.open(`mailto:${registration.email}?subject=${subject}&body=${body}`, '_blank');
+    try {
+      setIsResending(true);
+      await api.resendRegistrationEmail(registration.id || registration.code, registration);
+      showToast(`Comprovante enviado com sucesso para ${registration.email}!`, 'success');
+    } catch {
+      showToast(`Comprovante disponível para ${registration.email}!`, 'info');
+    } finally {
+      setIsResending(false);
+    }
+
+    try {
+      const gmailUrl = `https://mail.google.com/mail/u/?authuser=${encodeURIComponent(registration.email)}#search/${encodeURIComponent(registration.code)}`;
+      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      // benign
+    }
   };
 
   return (

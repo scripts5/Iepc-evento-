@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import {
   Calendar,
@@ -16,7 +16,8 @@ import {
   Mail,
   ShieldCheck,
   Building2,
-  Info
+  Info,
+  Timer,
 } from 'lucide-react';
 import { useEvent } from '../context/EventContext.tsx';
 import { defaultEventData } from '../data/defaultEvent.ts';
@@ -34,8 +35,46 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
   const registeredCount = activeEvent.registeredCount || 0;
-  const maxCap = activeEvent.maxCapacity || 500;
+  const maxCap = activeEvent.maxCapacity || 600;
   const pctFilled = Math.min(100, Math.round((registeredCount / maxCap) * 100));
+
+  // Countdown state
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    isPast: boolean;
+  }>({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: false });
+
+  useEffect(() => {
+    const calculateTime = () => {
+      // Event date at 08:00
+      const dateParts = (activeEvent.startDate || '2026-11-21').split('-');
+      const year = parseInt(dateParts[0], 10) || 2026;
+      const month = parseInt(dateParts[1], 10) - 1 || 10;
+      const day = parseInt(dateParts[2], 10) || 21;
+
+      const target = new Date(year, month, day, 8, 0, 0);
+      const diff = target.getTime() - Date.now();
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isPast: true });
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setTimeLeft({ days, hours, minutes, seconds, isPast: false });
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [activeEvent.startDate]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '21 de Novembro de 2026 (Sábado)';
@@ -80,6 +119,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 {activeEvent.tagline}
               </p>
 
+              {/* ADM Notice Banner if configured */}
+              {activeEvent.importantInfo && (
+                <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-950 text-xs flex items-start gap-2.5 shadow-2xs">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    <strong className="font-bold text-amber-900 mr-1.5">Aviso da Organização:</strong>
+                    <span>{activeEvent.importantInfo}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Event Key Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
@@ -106,7 +156,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       Horário
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-800">
-                      {activeEvent.time || 'A partir das 08h00 (Café) • O dia todo'}
+                      Início às 08:00 • Evento durante todo o dia
                     </span>
                   </div>
                 </div>
@@ -126,12 +176,48 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              {/* Capacity Progress Bar */}
-              <div className="bg-white/80 backdrop-blur-xs p-4 rounded-2xl border border-slate-200 space-y-2">
+              {/* Countdown Timer */}
+              {!timeLeft.isPast && (
+                <div className="bg-white p-4 rounded-2xl border border-indigo-100 shadow-xs space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-indigo-900">
+                    <span className="flex items-center gap-1.5 text-indigo-700">
+                      <Timer className="w-4 h-4 text-indigo-600 animate-pulse" />
+                      Contagem Regressiva para o Grande Dia:
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">Início às 08:00</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div className="bg-indigo-50/70 p-2 rounded-xl border border-indigo-100/70">
+                      <span className="text-xl sm:text-2xl font-black text-indigo-950 block">{timeLeft.days}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Dias</span>
+                    </div>
+                    <div className="bg-indigo-50/70 p-2 rounded-xl border border-indigo-100/70">
+                      <span className="text-xl sm:text-2xl font-black text-indigo-950 block">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Horas</span>
+                    </div>
+                    <div className="bg-indigo-50/70 p-2 rounded-xl border border-indigo-100/70">
+                      <span className="text-xl sm:text-2xl font-black text-indigo-950 block">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Minutos</span>
+                    </div>
+                    <div className="bg-indigo-50/70 p-2 rounded-xl border border-indigo-100/70">
+                      <span className="text-xl sm:text-2xl font-black text-indigo-950 block">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Segundos</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Status das Inscrições & Capacity Progress Bar */}
+              <div className="bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span className="flex items-center gap-1.5 text-slate-700">
                     <Users className="w-4 h-4 text-indigo-600" />
-                    Lotação do Auditório:
+                    Status das Inscrições:
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      isClosed ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {isClosed ? 'Encerradas' : 'Abertas'}
+                    </span>
                   </span>
                   <span className={pctFilled >= 90 ? 'text-amber-600 font-bold' : 'text-slate-600'}>
                     {registeredCount} de {maxCap} vagas ({pctFilled}%)
@@ -162,10 +248,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('/inscricao')}
-                    className="px-8 py-4 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-3"
+                    className="px-8 py-4 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-3 cursor-pointer"
                   >
                     <Ticket className="w-5 h-5" />
-                    Garantir Minha Vaga
+                    Inscreva-se
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 )}
@@ -173,10 +259,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => onNavigate('/consultar-inscricao')}
-                  className="px-6 py-4 rounded-2xl text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300/90 shadow-xs hover:border-slate-400 transition-all flex items-center gap-2.5"
+                  className="px-6 py-4 rounded-2xl text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300/90 shadow-xs hover:border-slate-400 transition-all flex items-center gap-2.5 cursor-pointer"
                 >
                   <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                  Já estou inscrito
+                  Já sou inscrito
                 </button>
               </div>
             </motion.div>
@@ -284,76 +370,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* 3. CRONOGRAMA & PROGRAMAÇÃO DO EVENTO */}
-      <section id="cronograma" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-xs font-bold text-indigo-700 shadow-xs">
-            <Clock className="w-3.5 h-3.5 text-indigo-600" />
-            <span>21 de Novembro de 2026 • Sábado</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Programação Oficial do Dia
-          </h2>
-          <p className="text-sm text-slate-600 max-w-2xl mx-auto">
-            Começaremos às <strong>08h00 da manhã</strong> com um delicioso café da manhã para todos e teremos uma programação especial durante o dia inteiro.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {(activeEvent.schedule || []).map((item, index) => (
-            <div
-              key={item.id || index}
-              className={`p-5 rounded-2xl border transition-all ${
-                index === 0
-                  ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-xs'
-                  : index === (activeEvent.schedule?.length || 0) - 1
-                  ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 shadow-xs'
-                  : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black ${
-                  index === 0
-                    ? 'bg-amber-100 text-amber-900'
-                    : index === (activeEvent.schedule?.length || 0) - 1
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-800'
-                }`}>
-                  <Clock className="w-3 h-3" />
-                  {item.time}
-                </span>
-                {index === 0 && (
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-full">
-                    ☕ Café da Manhã
-                  </span>
-                )}
-                {index === (activeEvent.schedule?.length || 0) - 1 && (
-                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
-                    🔥 Avivamento
-                  </span>
-                )}
-              </div>
-
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                {item.title}
-              </h3>
-
-              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                {item.description}
-              </p>
-
-              {item.location && (
-                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-                  <MapPin className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                  <span className="truncate">{item.location}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. PERGUNTAS FREQUENTES (FAQ) */}
+      {/* 3. PERGUNTAS FREQUENTES (FAQ) */}
       <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-10">
           <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">

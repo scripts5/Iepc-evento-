@@ -44,6 +44,21 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     refreshEvent();
+
+    // Real-time synchronization: sync on window focus and periodic interval
+    const handleFocus = () => {
+      refreshEvent();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    const interval = setInterval(() => {
+      refreshEvent();
+    }, 8000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, [refreshEvent]);
 
   return (

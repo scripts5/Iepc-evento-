@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Sparkles,
   Settings,
+  Award,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -29,7 +31,6 @@ import { DashboardStats, Registration } from '../types/index.ts';
 import { useToast } from '../context/ToastContext.tsx';
 import { useEvent } from '../context/EventContext.tsx';
 import { StatusBadge } from '../components/common/Badge.tsx';
-import { AdminRandomWidget } from '../components/admin/AdminRandomWidget.tsx';
 import { AdminDataVisualization } from '../components/admin/AdminDataVisualization.tsx';
 
 interface AdminDashboardPageProps {
@@ -48,7 +49,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
       setLoading(true);
       const [statsData, regsData] = await Promise.all([
         api.getAdminStats(),
-        api.getAdminRegistrations({ limit: 10, sortBy: 'date', sortOrder: 'desc' }),
+        api.getAdminRegistrations({ limit: 500, sortBy: 'date', sortOrder: 'desc' }),
       ]);
       setStats(statsData);
       setRecent(regsData.items);
@@ -67,7 +68,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-xs font-semibold text-slate-500">Atualizando métricas do evento...</p>
+        <p className="text-xs font-semibold text-slate-500">Atualizando métricas reais do evento...</p>
       </div>
     );
   }
@@ -76,21 +77,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
     {
       title: 'Total de Inscritos',
       value: stats.totalRegistrations,
-      sub: `${stats.capacityProgress}% da lotação máxima`,
+      sub: `${stats.capacityProgress}% das ${stats.maxCapacity || 600} vagas`,
       icon: Users,
       color: 'bg-indigo-50 text-indigo-600 border-indigo-100',
     },
     {
-      title: 'Inscrições de Hoje',
+      title: 'Inscrições Recentes (24h)',
       value: stats.todayRegistrations,
       sub: 'Cadastros nas últimas 24h',
       icon: Clock,
       color: 'bg-sky-50 text-sky-600 border-sky-100',
     },
     {
-      title: 'Confirmados',
+      title: 'Confirmados & Autorizados',
       value: stats.confirmedRegistrations,
-      sub: 'Inscrições ativas',
+      sub: 'Inscrições ativas (100% autorizadas)',
       icon: CalendarCheck,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
     },
@@ -102,19 +103,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
       color: 'bg-purple-50 text-purple-600 border-purple-100',
     },
     {
-      title: 'Cancelados',
-      value: stats.cancelledRegistrations,
-      sub: 'Vagas liberadas',
-      icon: UserX,
-      color: 'bg-rose-50 text-rose-600 border-rose-100',
+      title: 'Certificados Liberados',
+      value: stats.presentRegistrations,
+      sub: 'Emitidos após check-in',
+      icon: Award,
+      color: 'bg-amber-50 text-amber-600 border-amber-100',
     },
   ];
 
   return (
     <div className="space-y-8">
-      {/* Random Administrator Inspiration & Status Panel */}
-      <AdminRandomWidget />
-
       {/* Top Banner / Quick Action */}
       <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 border border-slate-800">
         <div className="space-y-1.5">
@@ -126,7 +124,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
             Controle de Inscrições e Credenciamento
           </h2>
           <p className="text-xs sm:text-sm text-slate-300">
-            {stats.presentRegistrations} participantes já realizaram check-in presencial no evento.
+            {stats.totalRegistrations} participante(s) cadastrado(s) na base oficial • {stats.presentRegistrations} check-ins realizados
           </p>
         </div>
 
@@ -294,24 +292,26 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
         </div>
       </div>
 
-      {/* Recent Registrations Table Snippet */}
+      {/* Registrations Table - Shows ALL registered attendees */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">Últimos Participantes Cadastrados</h3>
-              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
-                Aparecem Automaticamente
+              <h3 className="text-base font-bold text-slate-900">Participantes Cadastrados (Todos os Inscritos)</h3>
+              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                {recent.length} pessoa(s) no total
               </span>
             </div>
-            <p className="text-xs text-slate-500">Membros e convidados inscritos no evento (sem necessidade de autorização manual)</p>
+            <p className="text-xs text-slate-500">
+              Todas as pessoas cadastradas na base de dados oficial • Status sempre <strong>Confirmado e Autorizado</strong>
+            </p>
           </div>
           <button
             type="button"
             onClick={() => onNavigate('/admin/inscritos')}
-            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
           >
-            Ver lista completa de inscritos
+            Acessar gerenciador completo de inscritos
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -322,28 +322,40 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
               <tr>
                 <th className="py-3 px-4">Código</th>
                 <th className="py-3 px-4">Nome</th>
-                <th className="py-3 px-4">E-mail</th>
-                <th className="py-3 px-4">Tipo</th>
+                <th className="py-3 px-4">Gmail / E-mail</th>
+                <th className="py-3 px-4">Tipo / Categoria</th>
                 <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Data</th>
+                <th className="py-3 px-4">Data do Cadastro</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {recent.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
-                    Nenhum membro inscrito no momento (base de dados zerada). Os participantes aparecerão aqui automaticamente logo após o preenchimento do formulário.
+                    Nenhum participante inscrito no momento. Novos cadastros aparecerão aqui automaticamente.
                   </td>
                 </tr>
               ) : (
                 recent.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-700">{r.code}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-indigo-700">{r.code}</td>
                     <td className="py-3 px-4 font-semibold text-slate-900">{r.name}</td>
-                    <td className="py-3 px-4 text-slate-600 truncate max-w-[180px]">{r.email}</td>
+                    <td className="py-3 px-4 text-slate-600 truncate max-w-[200px]" title={r.email}>{r.email}</td>
                     <td className="py-3 px-4 capitalize font-medium text-slate-700">{r.ticketType}</td>
                     <td className="py-3 px-4">
-                      <StatusBadge status={r.status} />
+                      {r.status === 'Presente' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                          <CheckCircle2 className="w-3 h-3 text-purple-600" />
+                          Presente (Check-in OK)
+                        </span>
+                      ) : r.status === 'Cancelado' ? (
+                        <StatusBadge status="Cancelado" />
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          Confirmado / Autorizado
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-slate-500">
                       {new Date(r.createdAt).toLocaleDateString('pt-BR')}

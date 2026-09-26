@@ -349,7 +349,6 @@ export const AdminRegistrationsPage: React.FC = () => {
                     <th className="py-3 px-4">Código</th>
                     <th className="py-3 px-4">Participante & Idade</th>
                     <th className="py-3 px-4">Gmail / Telefone</th>
-                    <th className="py-3 px-4">Quem Leva (Convidados)</th>
                     <th className="py-3 px-4">Congregação / Cidade</th>
                     <th className="py-3 px-4">Check-in / Status</th>
                     <th className="py-3 px-4 text-right">Crachá & Ações</th>
@@ -357,9 +356,6 @@ export const AdminRegistrationsPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {items.map((r) => {
-                    const guestCount = r.accompanyingCount ?? r.guestsCount ?? 0;
-                    const guestNames = r.accompanyingNames || r.guestsNames;
-
                     return (
                       <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{r.code}</td>
@@ -383,24 +379,6 @@ export const AdminRegistrationsPage: React.FC = () => {
                             {r.email}
                           </span>
                           <span className="text-[11px] text-slate-400">{r.phone}</span>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {guestCount > 0 ? (
-                            <div>
-                              <span className="font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded text-[11px] inline-block mb-0.5">
-                                Leva {guestCount} pessoa(s)
-                              </span>
-                              {guestNames && (
-                                <p className="text-[11px] text-slate-600 truncate max-w-[170px]" title={guestNames}>
-                                  {guestNames}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-slate-400 italic">
-                              Apenas o participante
-                            </span>
-                          )}
                         </td>
                         <td className="py-3.5 px-4 text-slate-600 font-medium">
                           <span className="text-slate-900 font-semibold block">{r.city}/{r.state}</span>
@@ -500,9 +478,6 @@ export const AdminRegistrationsPage: React.FC = () => {
             {/* Mobile Cards View */}
             <div className="lg:hidden divide-y divide-slate-100">
               {items.map((r) => {
-                const guestCount = r.accompanyingCount ?? r.guestsCount ?? 0;
-                const guestNames = r.accompanyingNames || r.guestsNames;
-
                 return (
                   <div key={r.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
@@ -523,19 +498,6 @@ export const AdminRegistrationsPage: React.FC = () => {
                       </div>
                       <StatusBadge status={r.status} />
                     </div>
-
-                    {guestCount > 0 && (
-                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 text-xs">
-                        <span className="font-bold text-indigo-700 block">
-                          Leva {guestCount} pessoa(s)
-                        </span>
-                        {guestNames && (
-                          <span className="text-slate-600 text-[11px] block mt-0.5">
-                            {guestNames}
-                          </span>
-                        )}
-                      </div>
-                    )}
 
                     <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
                       <button

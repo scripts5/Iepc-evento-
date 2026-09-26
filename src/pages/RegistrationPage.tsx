@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
-  Ticket,
   User,
   Mail,
   Phone,
@@ -11,8 +10,13 @@ import {
   FileText,
   ShieldCheck,
   ArrowLeft,
+  ArrowRight,
   AlertCircle,
   CheckCircle2,
+  Lock,
+  Sparkles,
+  Ticket,
+  ChevronRight,
 } from 'lucide-react';
 import { useEvent } from '../context/EventContext.tsx';
 import { useToast } from '../context/ToastContext.tsx';
@@ -32,9 +36,11 @@ const BRAZILIAN_STATES = [
 ];
 
 export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, onSuccess }) => {
-  const { event, loading, refreshEvent } = useEvent();
+  const { event, refreshEvent } = useEvent();
   const activeEvent = event || defaultEventData;
   const { showToast } = useToast();
+
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -42,16 +48,19 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     phone: '',
     birthDate: '',
     age: '',
-    bringingGuests: false,
-    guestsCount: 1,
-    guestsNames: '',
     city: '',
     state: 'SP',
     organization: '',
-    ticketType: '',
+    ticketType: 'Membro IEPC',
     notes: '',
     termsAccepted: false,
   });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
 
   const calculateAge = (dateStr: string) => {
     if (!dateStr) return '';
@@ -66,13 +75,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     return diff >= 0 ? diff.toString() : '';
   };
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-
-  const isClosed = !activeEvent.isRegistrationOpen || activeEvent.isCapacityFull;
-
-  // Phone auto mask helper (optional field)
+  // Phone auto mask (optional WhatsApp/Phone)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '');
     if (val.length > 11) val = val.substring(0, 11);
@@ -90,7 +93,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
   };
 
-  const validate = (): boolean => {
+  const validateStep1 = (): boolean => {
     const errs: Record<string, string> = {};
 
     if (!formData.name.trim() || formData.name.trim().length < 3) {
@@ -99,10 +102,8 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-      errs.email = 'Informe um e-mail válido para receber o comprovante.';
+      errs.email = 'Informe um e-mail válido para receber seu comprovante e credencial.';
     }
-
-    // Phone / WhatsApp is strictly optional as requested by the user
 
     if (!formData.birthDate) {
       errs.birthDate = 'Data de nascimento é obrigatória.';
@@ -113,23 +114,50 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     }
 
     if (!formData.state) {
-      errs.state = 'Selecione o estado.';
-    }
-
-    if (!formData.ticketType || !formData.ticketType.trim()) {
-      errs.ticketType = 'Por favor, informe sua denominação (exemplo: convidado, membro, voluntários... etc).';
-    }
-
-    if (!formData.termsAccepted) {
-      errs.termsAccepted = 'Você deve concordar com os termos de participação.';
+      errs.state = 'Selecione o estado (UF).';
     }
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateStep2 = (): boolean => {
+    const errs: Record<string, string> = {};
+
+    if (!formData.ticketType || !formData.ticketType.trim()) {
+      errs.ticketType = 'Selecione ou informe sua categoria/denominação.';
+    }
+
+    if (!formData.termsAccepted) {
+      errs.termsAccepted = 'Você deve concordar com os termos de participação no evento.';
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
+
+    if (step === 1) {
+      if (validateStep1()) {
+        setStep(2);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        showToast('Por favor, preencha os dados pessoais corretamente.', 'warning');
+      }
+    } else if (step === 2) {
+      if (validateStep2()) {
+        setStep(3);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        showToast('Por favor, aceite os termos e confirme sua denominação.', 'warning');
+      }
+    }
+  };
+
+  const handleFinalSubmit = async () => {
     setServerError(null);
 
     if (isClosed) {
@@ -137,16 +165,29 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
       return;
     }
 
-    if (!validate()) {
-      showToast('Por favor, corrija os erros no formulário antes de continuar.', 'warning');
+    if (!validateStep1() || !validateStep2()) {
+      showToast('Existem campos pendentes no cadastro.', 'warning');
       return;
     }
 
     try {
       setSubmitting(true);
-      const res = await api.submitRegistration(formData);
-      showToast('Inscrição realizada com sucesso!', 'success');
-      refreshEvent();
+      const res = await api.submitRegistration({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        birthDate: formData.birthDate,
+        age: formData.age ? Number(formData.age) : undefined,
+        city: formData.city.trim(),
+        state: formData.state.trim().toUpperCase(),
+        organization: formData.organization.trim() || undefined,
+        ticketType: formData.ticketType.trim(),
+        notes: formData.notes.trim() || undefined,
+        termsAccepted: true,
+      });
+
+      showToast('Inscrição confirmada com sucesso!', 'success');
+      await refreshEvent();
       onSuccess(res.registration);
       onNavigate('/inscricao/sucesso');
     } catch (err: any) {
@@ -166,7 +207,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
           </div>
           <h2 className="text-2xl font-bold text-slate-900">Inscrições Encerradas</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            As inscrições para o <strong>{event?.name || 'Evento dos Jovens IEPC 2026'}</strong> atingiram o limite máximo de participantes ou foram finalizadas pela coordenação.
+            As inscrições para o <strong>{activeEvent.name}</strong> atingiram a capacidade máxima ou foram finalizadas pela coordenação.
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
@@ -190,375 +231,488 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
       {/* Back button */}
       <button
         type="button"
         onClick={() => onNavigate('/')}
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors mb-6"
+        className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar para a página inicial
       </button>
 
-      {/* Header Form */}
-      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-xl">
-        <div className="space-y-2 border-b border-slate-100 pb-6 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">
-            <Ticket className="w-3.5 h-3.5" />
-            Inscrição Oficial - Jovens IEPC
+      {/* Main Multi-step Card */}
+      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-xl space-y-8">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">
+              Inscrição Gratuita • Confirmação Automática
+            </span>
+            <span className="text-xs font-semibold text-slate-500">
+              Etapa {step} de 4
+            </span>
           </div>
+
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Formulário de Inscrição dos Jovens
+            Ficha de Inscrição Oficial
           </h1>
           <p className="text-sm text-slate-600">
-            Garanta sua vaga no <strong>{event?.name || 'Evento dos Jovens IEPC 2026'}</strong>. Inscrição 100% gratuita! Seu mini crachá e QR Code de entrada são gerados imediatamente.
+            Preencha seus dados para garantir sua vaga e seu Mini Crachá oficial com QR Code.
           </p>
         </div>
 
+        {/* Step Progress Indicator: Dados pessoais → informações → revisão → confirmação */}
+        <div className="grid grid-cols-4 gap-2 pt-2">
+          <div className="space-y-1.5">
+            <div className={`h-2 rounded-full transition-all ${
+              step >= 1 ? 'bg-indigo-600' : 'bg-slate-200'
+            }`} />
+            <span className={`text-[11px] font-bold block ${
+              step === 1 ? 'text-indigo-600' : 'text-slate-400'
+            }`}>
+              1. Dados Pessoais
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className={`h-2 rounded-full transition-all ${
+              step >= 2 ? 'bg-indigo-600' : 'bg-slate-200'
+            }`} />
+            <span className={`text-[11px] font-bold block ${
+              step === 2 ? 'text-indigo-600' : 'text-slate-400'
+            }`}>
+              2. Informações
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className={`h-2 rounded-full transition-all ${
+              step >= 3 ? 'bg-indigo-600' : 'bg-slate-200'
+            }`} />
+            <span className={`text-[11px] font-bold block ${
+              step === 3 ? 'text-indigo-600' : 'text-slate-400'
+            }`}>
+              3. Revisão
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="h-2 rounded-full transition-all bg-slate-200" />
+            <span className="text-[11px] font-bold block text-slate-400">
+              4. Confirmação
+            </span>
+          </div>
+        </div>
+
+        {/* Server Error Alert */}
         {serverError && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
             <div>
-              <strong className="font-semibold block">Atenção ao realizar inscrição:</strong>
+              <strong className="font-semibold block">Não foi possível concluir a inscrição:</strong>
               {serverError}
             </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Section: Dados Pessoais */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              1. Dados do Jovem / Participante
-            </h3>
-
-            {/* Nome Completo */}
-            <div>
-              <label htmlFor="name" className="block text-xs font-semibold text-slate-700 mb-1">
-                Nome Completo *
-              </label>
-              <div className="relative">
-                <input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => {
-                    setFormData({ ...formData, name: e.target.value });
-                    if (errors.name) setErrors({ ...errors, name: '' });
-                  }}
-                  placeholder="Ex: Gabriel Santos Oliveira"
-                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                    errors.name ? 'border-rose-400 focus:ring-2 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                  }`}
-                />
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-              </div>
-              {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
-            </div>
-
-            {/* Email & Phone */}
+        {/* Step 1: Dados Pessoais */}
+        {step === 1 && (
+          <motion.form
+            key="step1"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            onSubmit={handleNextStep}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1">
-                  E-mail *
+              {/* Full Name */}
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Nome Completo *
                 </label>
                 <div className="relative">
                   <input
-                    id="email"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (errors.name) setErrors({ ...errors, name: '' });
+                    }}
+                    placeholder="Digite seu nome completo"
+                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
+                      errors.name ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
+                    } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all`}
+                  />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                </div>
+                {errors.name && <p className="text-xs text-rose-600 font-medium">{errors.name}</p>}
+              </div>
+
+              {/* Email / Gmail */}
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  E-mail ou Gmail *
+                </label>
+                <div className="relative">
+                  <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => {
                       setFormData({ ...formData, email: e.target.value });
                       if (errors.email) setErrors({ ...errors, email: '' });
                     }}
-                    placeholder="seu.email@exemplo.com"
-                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                      errors.email ? 'border-rose-400 focus:ring-2 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                    }`}
+                    placeholder="seu.email@gmail.com"
+                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
+                      errors.email ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
+                    } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all`}
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 </div>
-                {errors.email && <p className="text-xs text-rose-600 mt-1">{errors.email}</p>}
+                <p className="text-[11px] text-slate-400">
+                  Você receberá seu comprovante oficial e QR Code neste endereço.
+                </p>
+                {errors.email && <p className="text-xs text-rose-600 font-medium">{errors.email}</p>}
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="phone" className="block text-xs font-semibold text-slate-700">
-                    Telefone de Contato (Opcional)
-                  </label>
-                  <span className="text-[11px] text-slate-400">WhatsApp não obrigatório</span>
-                </div>
-                <div className="relative">
-                  <input
-                    id="phone"
-                    type="text"
-                    value={formData.phone}
-                    onChange={handlePhoneChange}
-                    placeholder="(Opcional) Ex: (11) 98765-4321"
-                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                      errors.phone ? 'border-rose-400 focus:ring-2 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                    }`}
-                  />
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                </div>
-                {errors.phone && <p className="text-xs text-rose-600 mt-1">{errors.phone}</p>}
-              </div>
-            </div>
-
-            {/* BirthDate, Age & Organization */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label htmlFor="birthDate" className="block text-xs font-semibold text-slate-700 mb-1">
+              {/* BirthDate */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                   Data de Nascimento *
                 </label>
                 <div className="relative">
                   <input
-                    id="birthDate"
                     type="date"
                     value={formData.birthDate}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      let calculatedAge = formData.age;
-                      if (val) {
-                        const birth = new Date(val);
-                        if (!isNaN(birth.getTime())) {
-                          const now = new Date();
-                          let diff = now.getFullYear() - birth.getFullYear();
-                          const m = now.getMonth() - birth.getMonth();
-                          if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) diff--;
-                          if (diff > 0) calculatedAge = String(diff);
-                        }
-                      }
-                      setFormData({ ...formData, birthDate: val, age: calculatedAge });
+                      const bDate = e.target.value;
+                      const ageCalculated = calculateAge(bDate);
+                      setFormData({
+                        ...formData,
+                        birthDate: bDate,
+                        age: ageCalculated,
+                      });
                       if (errors.birthDate) setErrors({ ...errors, birthDate: '' });
                     }}
-                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                      errors.birthDate ? 'border-rose-400 focus:ring-2 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                    }`}
+                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
+                      errors.birthDate ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
+                    } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all`}
                   />
                   <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 </div>
-                {errors.birthDate && <p className="text-xs text-rose-600 mt-1">{errors.birthDate}</p>}
+                {errors.birthDate && <p className="text-xs text-rose-600 font-medium">{errors.birthDate}</p>}
               </div>
 
-              <div>
-                <label htmlFor="age" className="block text-xs font-semibold text-slate-700 mb-1">
-                  Idade (Anos)
-                </label>
-                <input
-                  id="age"
-                  type="number"
-                  min="5"
-                  max="120"
-                  value={formData.age}
-                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  placeholder="Ex: 19"
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden font-semibold text-slate-800"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="organization" className="block text-xs font-semibold text-slate-700 mb-1">
-                  Congregação / Igreja (Opcional)
-                </label>
+              {/* Phone / WhatsApp (Optional) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    WhatsApp / Telefone
+                  </label>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase">Opcional</span>
+                </div>
                 <div className="relative">
                   <input
-                    id="organization"
                     type="text"
-                    value={formData.organization}
-                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                    placeholder="Ex: IEPC Templo Sede"
-                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden"
+                    value={formData.phone}
+                    onChange={handlePhoneChange}
+                    placeholder="(11) 99999-9999"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
-                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 </div>
               </div>
-            </div>
 
-            {/* City and State */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-2">
-                <label htmlFor="city" className="block text-xs font-semibold text-slate-700 mb-1">
+              {/* City */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                   Cidade *
                 </label>
                 <div className="relative">
                   <input
-                    id="city"
                     type="text"
                     value={formData.city}
                     onChange={(e) => {
                       setFormData({ ...formData, city: e.target.value });
                       if (errors.city) setErrors({ ...errors, city: '' });
                     }}
-                    placeholder="Ex: São Paulo"
-                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                      errors.city ? 'border-rose-400 focus:ring-2 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                    }`}
+                    placeholder="Sua cidade"
+                    className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
+                      errors.city ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
+                    } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all`}
                   />
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 </div>
-                {errors.city && <p className="text-xs text-rose-600 mt-1">{errors.city}</p>}
+                {errors.city && <p className="text-xs text-rose-600 font-medium">{errors.city}</p>}
               </div>
 
-              <div>
-                <label htmlFor="state" className="block text-xs font-semibold text-slate-700 mb-1">
+              {/* State */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                   Estado (UF) *
                 </label>
                 <select
-                  id="state"
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  className="w-full px-3 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden font-medium"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all bg-white"
                 >
                   {BRAZILIAN_STATES.map((uf) => (
-                    <option key={uf} value={uf}>
-                      {uf}
-                    </option>
+                    <option key={uf} value={uf}>{uf}</option>
                   ))}
                 </select>
               </div>
             </div>
-          </div>
 
-          {/* Section: Qual sua denominação */}
-          <div className="pt-4 border-t border-slate-100 space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="ticketType" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  2. Qual sua denominação *
+            <div className="pt-4 flex items-center justify-end">
+              <button
+                type="submit"
+                className="px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <span>Avançar para Informações</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.form>
+        )}
+
+        {/* Step 2: Informações */}
+        {step === 2 && (
+          <motion.form
+            key="step2"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            onSubmit={handleNextStep}
+            className="space-y-6"
+          >
+            {/* Ticket / Denomination Type */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                Categoria de Participação / Denominação *
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {activeEvent.ticketTypes.map((t) => {
+                  const isSelected = formData.ticketType === t.name;
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => setFormData({ ...formData, ticketType: t.name })}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20 shadow-xs'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-sm font-bold text-slate-900">{t.name}</span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t.description}</p>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-2">
+                        100% Gratuito
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.ticketType && <p className="text-xs text-rose-600 font-medium">{errors.ticketType}</p>}
+            </div>
+
+            {/* Congregation / Church Name */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Congregação / Igreja de Origem
                 </label>
-                <span className="text-[11px] text-indigo-600 font-semibold">Campo obrigatório</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase">Opcional</span>
               </div>
               <div className="relative">
                 <input
-                  id="ticketType"
                   type="text"
-                  value={formData.ticketType}
-                  onChange={(e) => {
-                    setFormData({ ...formData, ticketType: e.target.value });
-                    if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
-                  }}
-                  placeholder="exemplo: convidado, membro,voluntários... etc"
-                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border bg-slate-50/50 focus:bg-white transition-all outline-hidden ${
-                    errors.ticketType
-                      ? 'border-rose-400 focus:ring-2 focus:ring-rose-200'
-                      : 'border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
-                  }`}
+                  value={formData.organization}
+                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                  placeholder="Ex: Templo Sede IEPC, Convidado de outra congregação..."
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                 />
                 <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
               </div>
-              {errors.ticketType && (
-                <p className="text-xs text-rose-600 mt-1">{errors.ticketType}</p>
-              )}
-
-              {/* Sugestões rápidas para facilitar o preenchimento */}
-              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                <span className="text-[11px] text-slate-400 mr-1 font-medium">Sugestões rápidas:</span>
-                {['Membro', 'Convidado', 'Voluntários', 'Liderança', 'IEPC'].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    onClick={() => {
-                      setFormData({ ...formData, ticketType: suggestion });
-                      if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
-                    }}
-                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                      formData.ticketType.toLowerCase() === suggestion.toLowerCase()
-                        ? 'bg-indigo-600 text-white border-indigo-600 font-semibold shadow-xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50'
-                    }`}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
             </div>
-          </div>
 
-          {/* Section: Observações */}
-          <div className="pt-4 border-t border-slate-100 space-y-2">
-            <label htmlFor="notes" className="block text-xs font-semibold text-slate-700">
-              Observações ou Necessidades Especiais (Opcional)
-            </label>
-            <textarea
-              id="notes"
-              rows={3}
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Ex: Necessidade de intérprete de Libras, acessibilidade motora, restrições alimentares..."
-              className="w-full p-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden resize-none"
-            />
-          </div>
-
-          {/* Section: LGPD & Termos */}
-          <div className="pt-4 border-t border-slate-100 space-y-3">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-600 leading-relaxed space-y-2">
-              <div className="flex items-center gap-2 font-bold text-slate-800">
-                <ShieldCheck className="w-4 h-4 text-indigo-600" />
-                Consentimento e Proteção de Dados (LGPD)
+            {/* Notes / Special Requests */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Observações ou Pedido de Oração
+                </label>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase">Opcional</span>
               </div>
-              <p>
-                Os dados fornecidos serão armazenados em ambiente protegido e utilizados exclusivamente pela organização para emissão da credencial, controle de acesso, envio de orientações do evento e certificado oficial.
+              <textarea
+                rows={2}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Ex: Pedido de oração pela família, necessidade de acessibilidade..."
+                className="w-full p-3 text-sm rounded-xl border border-slate-200 outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all resize-none"
+              />
+            </div>
+
+            {/* Terms of Service Acceptance */}
+            <div className={`p-4 rounded-2xl border ${
+              errors.termsAccepted ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200 bg-slate-50/50'
+            }`}>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.termsAccepted}
+                  onChange={(e) => {
+                    setFormData({ ...formData, termsAccepted: e.target.checked });
+                    if (errors.termsAccepted) setErrors({ ...errors, termsAccepted: '' });
+                  }}
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-1 cursor-pointer"
+                />
+                <div className="text-xs text-slate-600 space-y-1 leading-relaxed">
+                  <span className="font-bold text-slate-800 block">
+                    Aceite dos Termos de Participação & Privacidade *
+                  </span>
+                  <p>
+                    Concordo em participar do Encontro de Jovens da IEPC, autorizo o envio do comprovante digital para meu e-mail e declaro que os dados fornecidos são verdadeiros. Minha inscrição será automaticamente confirmada no sistema.
+                  </p>
+                </div>
+              </label>
+              {errors.termsAccepted && (
+                <p className="text-xs text-rose-600 font-medium mt-2">{errors.termsAccepted}</p>
+              )}
+            </div>
+
+            <div className="pt-4 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                Voltar
+              </button>
+
+              <button
+                type="submit"
+                className="px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <span>Avançar para Revisão</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.form>
+        )}
+
+        {/* Step 3: Revisão & Confirmação */}
+        {step === 3 && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="space-y-6"
+          >
+            <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-3">
+              <div className="flex items-center gap-2 text-indigo-900 font-bold text-sm">
+                <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+                <span>Confira os dados antes de finalizar:</span>
+              </div>
+              <p className="text-xs text-indigo-800/90 leading-relaxed">
+                Todas as inscrições são <strong>automaticamente confirmadas</strong> e salvas no banco de dados oficial da IEPC. Não há aprovação manual do ADM.
               </p>
             </div>
 
-            <label className="flex items-start gap-3 cursor-pointer pt-1">
-              <input
-                type="checkbox"
-                checked={formData.termsAccepted}
-                onChange={(e) => {
-                  setFormData({ ...formData, termsAccepted: e.target.checked });
-                  if (errors.termsAccepted) setErrors({ ...errors, termsAccepted: '' });
-                }}
-                className="mt-1 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
-              />
-              <span className="text-xs text-slate-700 leading-relaxed">
-                Declaro que li e concordo com os{' '}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('/termos')}
-                  className="text-indigo-600 font-semibold hover:underline"
-                >
-                  Termos do Evento
-                </button>{' '}
-                e com a{' '}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('/privacidade')}
-                  className="text-indigo-600 font-semibold hover:underline"
-                >
-                  Política de Privacidade
-                </button>
-                . *
-              </span>
-            </label>
-            {errors.termsAccepted && (
-              <p className="text-xs text-rose-600 font-medium">{errors.termsAccepted}</p>
-            )}
-          </div>
+            {/* Review Card */}
+            <div className="rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 text-xs sm:text-sm">
+              <div className="p-4 bg-slate-50 flex items-center justify-between font-semibold">
+                <span className="text-slate-500">Evento:</span>
+                <span className="text-slate-900 font-bold">{activeEvent.name}</span>
+              </div>
 
-          {/* Submit Button */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-4 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {submitting ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Processando inscrição...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-5 h-5" />
-                  Confirmar e Gerar Credencial
-                </>
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Nome:</span>
+                <span className="font-bold text-slate-900">{formData.name}</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Gmail / E-mail:</span>
+                <span className="font-semibold text-slate-800">{formData.email}</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Data de Nascimento:</span>
+                <span className="text-slate-800">
+                  {formData.birthDate ? formData.birthDate.split('-').reverse().join('/') : ''}
+                  {formData.age ? ` (${formData.age} anos)` : ''}
+                </span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Cidade / UF:</span>
+                <span className="text-slate-800">{formData.city} - {formData.state}</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Telefone:</span>
+                <span className="text-slate-800">{formData.phone || 'Não informado'}</span>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Categoria:</span>
+                <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full text-xs">
+                  {formData.ticketType}
+                </span>
+              </div>
+
+              {formData.organization && (
+                <div className="p-4 flex items-center justify-between">
+                  <span className="text-slate-500">Congregação / Igreja:</span>
+                  <span className="text-slate-800">{formData.organization}</span>
+                </div>
               )}
-            </button>
-          </div>
-        </form>
+
+              <div className="p-4 flex items-center justify-between">
+                <span className="text-slate-500">Status após envio:</span>
+                <span className="font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs">
+                  Confirmado Automaticamente
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-4 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => setStep(2)}
+                className="px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Voltar e Corrigir
+              </button>
+
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleFinalSubmit}
+                className="px-8 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+              >
+                {submitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span>Salvando no Banco & Confirmando...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Concluir e Confirmar Inscrição</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

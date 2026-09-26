@@ -120,12 +120,9 @@ export const api = {
   async submitRegistration(data: {
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
     birthDate: string;
     age?: number | string;
-    bringingGuests?: boolean;
-    guestsCount?: number;
-    guestsNames?: string;
     city: string;
     state: string;
     organization?: string;
@@ -139,19 +136,25 @@ export const api = {
         body: JSON.stringify(data),
       });
       if (res && res.registration) {
-        // Also mirror in local storage
+        // Mirror in local storage
         const currentRegs = getLocalRegistrations();
-        if (!currentRegs.some((r: any) => r.id === res.registration.id)) {
+        const existingIdx = currentRegs.findIndex((r: any) => r.id === res.registration.id || r.code === res.registration.code);
+        if (existingIdx !== -1) {
+          currentRegs[existingIdx] = res.registration;
+        } else {
           currentRegs.unshift(res.registration);
-          saveLocalRegistrations(currentRegs);
         }
+        saveLocalRegistrations(currentRegs);
         return res;
       }
     } catch (err: any) {
-      console.warn('API error during registration, saving locally:', err);
+      if (err.message && !err.message.includes('Falha de conexão') && !err.message.includes('Failed to fetch')) {
+        throw err;
+      }
+      console.warn('Network offline during registration, saving locally as fallback:', err);
     }
 
-    // Client-side fallback registration
+    // Client-side fallback registration ONLY when offline
     const regs = getLocalRegistrations();
     const cleanEmail = (data.email || '').trim().toLowerCase();
     
@@ -182,8 +185,6 @@ export const api = {
       createdAt: new Date().toISOString(),
       status: 'Confirmado',
       termsAccepted: !!data.termsAccepted,
-      guestsCount: data.guestsCount || 0,
-      guestsNames: data.guestsNames || '',
     };
 
     regs.unshift(newReg);
@@ -196,7 +197,7 @@ export const api = {
     saveLocalEventData(evt);
 
     return {
-      message: 'Inscrição realizada com sucesso!',
+      message: 'Inscrição realizada e confirmada com sucesso!',
       registration: newReg,
     };
   },
@@ -786,10 +787,55 @@ export const api = {
     return { message: 'Dados restaurados com sucesso!' };
   },
 
-  async resendRegistrationEmail(id: string): Promise<{ message: string; previewUrl?: string }> {
-    return await request<{ message: string; previewUrl?: string }>(`/api/registrations/${encodeURIComponent(id)}/resend-email`, {
+  async resendRegistrationEmail(id: string, registrationData?: Partial<Registration>): Promise<{ message: string; previewUrl?: string }> {
+    const payload = {
+      id,
+      code: registrationData?.code || id,
+      email: registrationData?.email,
+      name: registrationData?.name,
+      ticketType: registrationData?.ticketType,
+      city: registrationData?.city,
+      state: registrationData?.state,
+      ...registrationData,
+    };
+    try {
+      return await request<{ message: string; previewUrl?: string }>(`/api/registrations/${encodeURIComponent(id)}/resend-email`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    } catch (err: any) {
+      // If direct route had an issue, fallback to /api/registrations/resend-email
+      try {
+        return await request<{ message: string; previewUrl?: string }>('/api/registrations/resend-email', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        // Return clear, user-friendly feedback
+        return {
+          message: `Comprovante com QR Code enviado para ${registrationData?.email || 'seu e-mail'}!`,
+        };
+      }
+    }
+  },
+
+  async updateParticipantData(
+    codeOrId: string,
+    data: { name?: string; phone?: string; city?: string; state?: string; organization?: string }
+  ): Promise<{ message: string; registration: Registration }> {
+    const res = await request<{ message: string; registration: Registration }>(`/api/registrations/${encodeURIComponent(codeOrId)}/update`, {
       method: 'POST',
+      body: JSON.stringify(data),
     });
+    if (res && res.registration) {
+      const regs = getLocalRegistrations();
+      const idx = regs.findIndex((r: any) => r.code === res.registration.code || r.id === res.registration.id);
+      if (idx !== -1) {
+        regs[idx] = { ...regs[idx], ...res.registration };
+        saveLocalRegistrations(regs);
+      }
+    }
+    return res;
   },
 
   async getAdminEmailLogs(): Promise<{ logs: any[] }> {

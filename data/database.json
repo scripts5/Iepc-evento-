@@ -7,7 +7,7 @@
     "importantInfo": "Inscrições 100% gratuitas! Não é necessário ter WhatsApp para se inscrever. O evento acontecerá no dia 21 de Novembro de 2026 (sábado), com início às 8h da manhã com um delicioso café da manhã para todos e programação abençoada durante o dia inteiro. Traga sua Bíblia, venha com coração aberto e convide seus amigos!",
     "startDate": "2026-11-21",
     "endDate": "2026-11-21",
-    "time": "A partir das 08h00 (Café da Manhã) • O dia todo",
+    "time": "Início às 08:00 • Evento durante todo o dia",
     "locationName": "Igreja Evangélica Pentecostal Cristã (IEPC) - Templo Sede",
     "locationAddress": "Templo Sede da IEPC - Auditório Central dos Jovens",
     "bannerUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80",
@@ -36,72 +36,7 @@
         "maxQuantity": 50
       }
     ],
-    "schedule": [
-      {
-        "id": "sch-1",
-        "time": "08h00 - 09h00",
-        "title": "Café da Manhã & Recepção de Boas-Vindas",
-        "speaker": "Equipe de Acolhimento Jovem IEPC",
-        "description": "Acolhimento da juventude, credenciamento com QR Code, entrega dos mini crachás e café da manhã especial para começar o dia juntos.",
-        "location": "Salão de Convivência & Hall do Templo"
-      },
-      {
-        "id": "sch-2",
-        "time": "09h00 - 09h45",
-        "title": "Abertura Oficial, Oração & Louvor Inicial",
-        "speaker": "Liderança da Juventude IEPC",
-        "description": "Oração de consagração do dia, dinâmicas de integração e início da adoração ao Senhor.",
-        "location": "Nave Principal"
-      },
-      {
-        "id": "sch-3",
-        "time": "09h45 - 11h45",
-        "title": "Louvor ao Vivo & 1ª Ministração da Palavra",
-        "speaker": "Ministério de Louvor Jovem IEPC & Pastores",
-        "description": "Forte momento de celebração e primeira mensagem bíblica direcionada para a vida dos jovens.",
-        "location": "Altar Central"
-      },
-      {
-        "id": "sch-4",
-        "time": "11h45 - 13h30",
-        "title": "Intervalo para Almoço & Convivência",
-        "speaker": "Todos os Jovens e Visitantes",
-        "description": "Momento de confraternização, integração fraterna entre amigos e visitantes e descanso.",
-        "location": "Área de Convivência"
-      },
-      {
-        "id": "sch-5",
-        "time": "13h30 - 15h30",
-        "title": "Painel dos Jovens, Dinâmicas & Testemunhos",
-        "speaker": "Líderes de Jovens e Convidados",
-        "description": "Roda de conversa cristã, testemunhos edificantes e perguntas da juventude.",
-        "location": "Auditório Central dos Jovens"
-      },
-      {
-        "id": "sch-6",
-        "time": "15h30 - 17h00",
-        "title": "Louvor Acústico, Gincana Bíblica & Atividades",
-        "speaker": "Equipe de Dinâmicas e Louvor",
-        "description": "Atividades interativas, quebra-gelo e momentos especiais de aprendizado da Palavra.",
-        "location": "Nave Principal"
-      },
-      {
-        "id": "sch-7",
-        "time": "17h00 - 18h00",
-        "title": "Lanche da Tarde & Sessão de Fotos",
-        "speaker": "Todos os Participantes",
-        "description": "Lanche especial da tarde, fotos comemorativas no backdrop do evento e comunhão.",
-        "location": "Área de Convivência"
-      },
-      {
-        "id": "sch-8",
-        "time": "18h00 - 21h00",
-        "title": "Grande Culto de Avivamento & Clamor no Altar",
-        "speaker": "Corpo Pastoral & Ministros Convidados",
-        "description": "Culto solene de encerramento com louvor vibrante, pregação avivada, clamor no altar e consagração da juventude.",
-        "location": "Templo Sede IEPC"
-      }
-    ],
+    "schedule": [],
     "faq": [
       {
         "id": "faq-1",
@@ -115,8 +50,8 @@
       },
       {
         "id": "faq-3",
-        "question": "Qual a data e horário exatos do evento?",
-        "answer": "O Evento dos Jovens acontecerá no dia 21 de Novembro de 2026 (sábado). Começará às 8h da manhã com um delicioso café da manhã para todos e se estenderá durante o dia inteiro com louvor, ministrações, dinâmicas, almoço e encerramento com o Culto de Avivamento!"
+        "question": "Qual a data e horário do evento?",
+        "answer": "O evento acontecerá no dia 21 de Novembro de 2026 (sábado), com início às 08:00 e acontecerá durante todo o dia. Todas as inscrições são confirmadas automaticamente!"
       },
       {
         "id": "faq-4",
@@ -163,8 +98,8 @@
       "name": "Administrador IEPC",
       "email": "admin@iepc.com",
       "role": "ADMIN",
-      "passwordHash": "67e62735e7c55d6f948d109951e3af4c1e00017e6a8b7260578502f8b9eb9075e51b5a882b678f8d325152e945ab87c0809e6de18044370b741e13bb62a132b4",
-      "salt": "d651e0edc51e02c62919edaa0bd52f84",
+      "passwordHash": "381ac2c7141b096bf3bab21aa715406c5dae4bbbf86471f05ce1fe2c0549011845be3df815317cf6ec4cd9fc7fdbc7d955fdd3461441b9a7695d77a65859c6f0",
+      "salt": "ed2c1fef7fa401926a15b1d58112202c",
       "createdAt": "2026-09-20T12:00:00.000Z"
     }
   ],

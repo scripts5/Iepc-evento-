@@ -67,17 +67,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             </button>
             <button
               type="button"
-              onClick={() => handleNav('#cronograma')}
-              className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-            >
-              Cronograma (8h às 21h)
-            </button>
-            <button
-              type="button"
               onClick={() => handleNav('#informacoes')}
               className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
             >
-              Informações
+              Informações & Avisos
             </button>
             <button
               type="button"
@@ -119,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
               }`}
             >
               <CheckCircle className="w-4 h-4 text-indigo-600" />
-              Já estou inscrito
+              Já sou inscrito
             </button>
 
             {isRegistrationClosed ? (
@@ -185,18 +178,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
             </button>
             <button
               type="button"
-              onClick={() => handleNav('#cronograma')}
-              className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg flex items-center justify-between"
-            >
-              <span>Cronograma Oficial</span>
-              <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">8h às 21h</span>
-            </button>
-            <button
-              type="button"
               onClick={() => handleNav('#informacoes')}
               className="w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
             >
-              Informações Importantes
+              Informações & Avisos
             </button>
             <button
               type="button"
@@ -221,7 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate }) => {
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-300 text-slate-700 bg-slate-50"
             >
               <CheckCircle className="w-4 h-4 text-indigo-600" />
-              Já estou inscrito
+              Já sou inscrito
             </button>
 
             <button

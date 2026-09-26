@@ -70,9 +70,16 @@ async function getTransporter(): Promise<Transporter> {
     return cachedTransporter;
   }
 
-  // Automatic Ethereal fallback for instant testing and simulated delivery with preview link
+  // Automatic Ethereal fallback with strict timeout for instant testing and simulated delivery
   try {
-    const testAccount = await nodemailer.createTestAccount();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Ethereal connection timeout')), 3500)
+    );
+    const testAccount = (await Promise.race([
+      nodemailer.createTestAccount(),
+      timeoutPromise,
+    ])) as any;
+
     cachedTransporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
@@ -83,10 +90,10 @@ async function getTransporter(): Promise<Transporter> {
       },
     });
     isEthereal = true;
-    console.log(`[E-mail] Transporter Ethereal (Ambiente de Testes/Desenvolvimento) ativado: ${testAccount.user}`);
+    console.log(`[E-mail] Transporter Ethereal (Ambiente de Testes) ativado: ${testAccount.user}`);
     return cachedTransporter;
   } catch (err) {
-    console.warn('[E-mail] Não foi possível criar conta Ethereal, usando JSON transport:', err);
+    console.warn('[E-mail] Fallback para transporte local/simulado:', err);
     cachedTransporter = nodemailer.createTransport({ jsonTransport: true });
     return cachedTransporter;
   }
@@ -351,11 +358,6 @@ export function buildVoucherEmailHtml(reg: RegistrationEmailData): string {
           <tr>
             <td class="details-label">Congregação / Igreja</td>
             <td class="details-value">${reg.organization}</td>
-          </tr>` : ''}
-          ${guests > 0 ? `
-          <tr>
-            <td class="details-label">Convidados adicionais</td>
-            <td class="details-value">${guests} pessoa(s) ${guestNames ? `(${guestNames})` : ''}</td>
           </tr>` : ''}
           <tr>
             <td class="details-label">Valor da Inscrição</td>

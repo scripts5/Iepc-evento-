@@ -301,12 +301,6 @@ export const AdminBadgesPage: React.FC = () => {
                         {attendee.organization}
                       </p>
                     )}
-
-                    {(attendee.guestsCount || 0) > 0 && (
-                      <span className="inline-block text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full mt-1">
-                        +{attendee.guestsCount} convidado(s) acompanhante(s)
-                      </span>
-                    )}
                   </div>
 
                   {/* QR Code and Code Box */}

@@ -15,6 +15,12 @@ import {
   Award,
   CreditCard,
   Clock,
+  Edit3,
+  X,
+  Save,
+  Building2,
+  User,
+  Phone,
 } from 'lucide-react';
 import { api } from '../services/api.ts';
 import { Registration } from '../types/index.ts';
@@ -29,11 +35,18 @@ interface CheckRegistrationPageProps {
   onNavigate: (path: string) => void;
 }
 
+const BRAZILIAN_STATES = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+];
+
 export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ onNavigate }) => {
   const { event } = useEvent();
   const { showToast } = useToast();
 
-  const [query, setQuery] = useState('');
+  const [inputCode, setInputCode] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [registration, setRegistration] = useState<Registration | null>(null);
   const [notFoundError, setNotFoundError] = useState<string | null>(null);
@@ -41,32 +54,101 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
   // Modals
   const [isVoucherOpen, setIsVoucherOpen] = useState(false);
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
-  const [certModalView, setCertModalView] = useState<'certificate' | 'badge'>('certificate');
+  const [certModalView, setCertModalView] = useState<'certificate' | 'badge'>('badge');
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Edit personal data modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    phone: '',
+    city: '',
+    state: 'SP',
+    organization: '',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setNotFoundError(null);
     setRegistration(null);
 
-    const clean = query.trim();
-    if (!clean) {
-      showToast('Por favor, informe seu código ou e-mail cadastrado.', 'warning');
+    const cleanCode = inputCode.trim();
+    const cleanEmail = inputEmail.trim().toLowerCase();
+
+    if (!cleanCode && !cleanEmail) {
+      showToast('Por favor, informe seu código de inscrição ou e-mail.', 'warning');
       return;
     }
 
     try {
       setLoading(true);
-      const res = await api.checkRegistration(clean);
+      // Query with code first, fallback to email
+      const queryToUse = cleanCode || cleanEmail;
+      const res = await api.checkRegistration(queryToUse);
+
+      // If both were provided, verify they match
+      if (cleanEmail && res.email.toLowerCase() !== cleanEmail && !cleanCode) {
+        throw new Error('E-mail não corresponde à inscrição informada.');
+      }
+
       setRegistration(res);
-      showToast('Inscrição localizada!', 'success');
+      showToast('Inscrição confirmada e localizada!', 'success');
     } catch (err: any) {
       setNotFoundError(err.message || 'Nenhuma inscrição localizada com os dados fornecidos.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEditModal = () => {
+    if (!registration) return;
+    setEditFormData({
+      name: registration.name || '',
+      phone: registration.phone || '',
+      city: registration.city || '',
+      state: registration.state || 'SP',
+      organization: registration.organization || '',
+    });
+    setEditError(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registration) return;
+
+    if (!editFormData.name.trim() || editFormData.name.trim().length < 3) {
+      setEditError('Nome completo deve ter pelo menos 3 caracteres.');
+      return;
+    }
+    if (!editFormData.city.trim()) {
+      setEditError('Cidade é obrigatória.');
+      return;
+    }
+
+    try {
+      setSavingEdit(true);
+      setEditError(null);
+      const res = await api.updateParticipantData(registration.code, {
+        name: editFormData.name.trim(),
+        phone: editFormData.phone.trim(),
+        city: editFormData.city.trim(),
+        state: editFormData.state.trim().toUpperCase(),
+        organization: editFormData.organization.trim(),
+      });
+
+      setRegistration(res.registration);
+      setIsEditModalOpen(false);
+      showToast('Seus dados pessoais foram atualizados com sucesso!', 'success');
+    } catch (err: any) {
+      setEditError(err.message || 'Erro ao atualizar dados pessoais.');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -98,7 +180,7 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
       <button
         type="button"
         onClick={() => onNavigate('/')}
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar para a página inicial
@@ -108,46 +190,71 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
       <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-xl space-y-6">
         <div className="space-y-2">
           <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">
-            Consulta de Credencial
+            Consulta de Inscrição Oficial
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Consultar Inscrição
+            Já sou Inscrito
           </h1>
           <p className="text-sm text-slate-600">
-            Digite seu <strong>e-mail cadastrado</strong> ou o <strong>código de inscrição</strong> (ex: EVT-26-XXXX) para visualizar seus dados, status ou obter a 2ª via do QR Code.
+            Consulte sua inscrição usando seu <strong>Código</strong> e/ou <strong>E-mail</strong> para acessar seu QR Code, mini crachá, certificado ou atualizar seus dados.
           </p>
         </div>
 
-        {/* Search Input Form */}
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative flex-1 w-full">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Digite seu e-mail ou código EVT-..."
-              className="w-full pl-11 pr-4 py-3.5 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden"
-            />
-            <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+        {/* Search Input Form (Código + E-mail) */}
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                Código de Inscrição
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                  placeholder="Ex: EVT-26-XXXX"
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden font-mono uppercase"
+                />
+                <Ticket className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                E-mail Cadastrado
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  value={inputEmail}
+                  onChange={(e) => setInputEmail(e.target.value)}
+                  placeholder="seu.email@gmail.com"
+                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-hidden"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              </div>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full sm:w-auto px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 shrink-0 disabled:opacity-60"
-          >
-            {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                Buscando...
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                Localizar Inscrição
-              </>
-            )}
-          </button>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full sm:w-auto px-8 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Consultando...
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4" />
+                  Consultar Inscrição
+                </>
+              )}
+            </button>
+          </div>
         </form>
 
         {/* Not Found Error */}
@@ -168,14 +275,27 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 pt-6 border-t border-slate-100 space-y-6"
           >
+            {/* Header info with status CONFIRMADO */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
               <div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-                  Status Atual da Inscrição
+                  Status da Inscrição
                 </span>
                 <div className="flex items-center gap-2.5 mt-1">
                   <h3 className="text-lg font-bold text-slate-900">{registration.name}</h3>
-                  <StatusBadge status={registration.status} />
+                  {registration.status === 'Presente' ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
+                      Presente (Check-in OK)
+                    </span>
+                  ) : registration.status === 'Cancelado' ? (
+                    <StatusBadge status="Cancelado" />
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Confirmado
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -186,10 +306,21 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                 <button
                   type="button"
                   onClick={() => handleCopyCode(registration.code)}
-                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200"
+                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-slate-200 cursor-pointer"
                   title="Copiar código"
                 >
                   {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                </button>
+
+                {/* Edit personal data button */}
+                <button
+                  type="button"
+                  onClick={openEditModal}
+                  className="px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Editar dados pessoais"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Editar Dados</span>
                 </button>
               </div>
             </div>
@@ -197,7 +328,7 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
             {/* QR Code and Key Details */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
               {/* QR Code */}
-              <div className="sm:col-span-4 flex flex-col items-center justify-center p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
+              <div className="sm:col-span-4 flex flex-col items-center justify-center p-4 bg-white border border-slate-200 rounded-2xl shadow-xs text-center">
                 {registration.qrCodeDataUrl ? (
                   <img
                     src={registration.qrCodeDataUrl}
@@ -206,11 +337,11 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                   />
                 ) : (
                   <div className="w-36 h-36 flex items-center justify-center text-xs text-slate-400">
-                    QR Code Indisponível
+                    QR Code Gerado
                   </div>
                 )}
-                <span className="text-[11px] font-medium text-slate-500 mt-2">
-                  Apresentar na recepção
+                <span className="text-[11px] font-bold text-indigo-600 mt-2">
+                  Apresentar na Portaria
                 </span>
               </div>
 
@@ -222,14 +353,14 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                     <span className="text-slate-800 font-medium truncate block">{registration.email}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 text-xs font-semibold uppercase block">Telefone</span>
+                    <span className="text-slate-400 text-xs font-semibold uppercase block">WhatsApp / Telefone</span>
                     <span className="text-slate-800 font-medium">{registration.phone || 'Não informado'}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                   <div>
-                    <span className="text-slate-400 text-xs font-semibold uppercase block">Denominação</span>
+                    <span className="text-slate-400 text-xs font-semibold uppercase block">Categoria</span>
                     <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded text-xs capitalize inline-block mt-0.5">
                       {registration.ticketType}
                     </span>
@@ -242,70 +373,79 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                   </div>
                 </div>
 
-                {registration.checkedInAt && (
-                  <div className="p-2.5 rounded-xl bg-purple-50 text-purple-900 text-xs border border-purple-100 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
-                    <span>
-                      Presença registrada em: {new Date(registration.checkedInAt).toLocaleString('pt-BR')}
-                    </span>
+                {registration.organization && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <span className="text-slate-400 text-xs font-semibold uppercase block">Igreja / Congregação</span>
+                    <span className="text-slate-800 font-medium">{registration.organization}</span>
                   </div>
                 )}
+
+                {/* Check-in Status Display */}
+                <div className="pt-2 border-t border-slate-100">
+                  <span className="text-slate-400 text-xs font-semibold uppercase block mb-1">Status do Check-in</span>
+                  {registration.checkedInAt ? (
+                    <div className="p-2.5 rounded-xl bg-purple-50 text-purple-900 text-xs border border-purple-100 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
+                      <span>
+                        <strong>Presença Registrada!</strong> Check-in realizado em {new Date(registration.checkedInAt).toLocaleString('pt-BR')} na recepção.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 text-xs border border-slate-200/80 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>
+                        <strong>Aguardando Check-in:</strong> Apresente seu QR Code na entrada do evento para confirmar presença e retirar seu crachá.
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Certificate & Mini Badge Section */}
-            {registration.status === 'Presente' ? (
-              <div className="p-4 bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-amber-50/60 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-xs shrink-0">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                      Certificado de Participação Liberado!
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                        Presença OK
-                      </span>
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      Sua presença foi confirmada. Acesse seu Certificado em PDF com código de autenticidade ou seu Mini Crachá.
-                    </p>
-                  </div>
-                </div>
+            {/* Crachá & Certificado Row */}
+            <div className="p-4 bg-gradient-to-r from-indigo-50 via-slate-50 to-purple-50 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
+              <div className="space-y-1">
+                <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-indigo-600" />
+                  Mini Crachá & Certificado Digital
+                </h4>
+                <p className="text-xs text-slate-600">
+                  {registration.status === 'Presente'
+                    ? 'Presença confirmada! Seu certificado digital está liberado para emissão com código único.'
+                    : 'Acesse seu Mini Crachá oficial. O Certificado em PDF é liberado automaticamente após o check-in na portaria.'}
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCertModalView('badge');
-                      setIsCertModalOpen(true);
-                    }}
-                    className="px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors shadow-xs flex items-center gap-1.5"
-                  >
-                    <CreditCard className="w-3.5 h-3.5 text-indigo-600" />
-                    Mini Crachá
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCertModalView('certificate');
-                      setIsCertModalOpen(true);
-                    }}
-                    className="px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
-                  >
-                    <Award className="w-3.5 h-3.5" />
-                    Baixar Certificado (PDF)
-                  </button>
-                </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCertModalView('badge');
+                    setIsCertModalOpen(true);
+                  }}
+                  className="px-3.5 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-indigo-600" />
+                  Visualizar Crachá
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCertModalView('certificate');
+                    setIsCertModalOpen(true);
+                  }}
+                  className={`px-3.5 py-2 text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer ${
+                    registration.status === 'Presente'
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  {registration.status === 'Presente' ? 'Baixar Certificado' : 'Ver Certificado'}
+                </button>
               </div>
-            ) : (
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-500 flex items-center gap-2.5">
-                <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>
-                  O <strong>Certificado Digital de Participação (PDF)</strong> com código único e o Mini Crachá oficial serão liberados imediatamente após o registro presencial do seu check-in.
-                </span>
-              </div>
-            )}
+            </div>
 
             {/* Action buttons */}
             <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
@@ -313,7 +453,7 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                 <button
                   type="button"
                   onClick={() => setIsCancelModalOpen(true)}
-                  className="text-xs font-medium text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1.5"
+                  className="text-xs font-medium text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1.5 cursor-pointer"
                 >
                   <ShieldAlert className="w-4 h-4" />
                   Solicitar cancelamento da vaga (LGPD)
@@ -324,7 +464,7 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
                 <button
                   type="button"
                   onClick={() => setIsVoucherOpen(true)}
-                  className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs flex items-center gap-2 transition-colors"
+                  className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <Printer className="w-4 h-4" />
                   Abrir Comprovante Oficial
@@ -334,6 +474,124 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
           </motion.div>
         )}
       </div>
+
+      {/* Modal para Editar Dados Pessoais Autorizados */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-slate-200 shadow-2xl relative"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Editar Dados Pessoais</h3>
+                <p className="text-xs text-slate-500">Alterações são sincronizadas diretamente no banco</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {editError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl">
+                {editError}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">Nome Completo *</label>
+                <input
+                  type="text"
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">WhatsApp / Telefone</label>
+                <input
+                  type="text"
+                  value={editFormData.phone}
+                  onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  placeholder="(11) 99999-9999"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2 space-y-1">
+                  <label className="font-semibold text-slate-700 block">Cidade *</label>
+                  <input
+                    type="text"
+                    value={editFormData.city}
+                    onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 block">Estado *</label>
+                  <select
+                    value={editFormData.state}
+                    onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500 bg-white"
+                  >
+                    {BRAZILIAN_STATES.map((uf) => (
+                      <option key={uf} value={uf}>{uf}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 block">Congregação / Igreja de Origem</label>
+                <input
+                  type="text"
+                  value={editFormData.organization}
+                  onChange={(e) => setEditFormData({ ...editFormData, organization: e.target.value })}
+                  placeholder="Ex: Templo Sede IEPC"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm outline-hidden focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  {savingEdit ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>Salvando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Salvar Alterações</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
 
       {/* Voucher Full Screen Modal */}
       <VoucherModal
@@ -350,24 +608,23 @@ export const CheckRegistrationPage: React.FC<CheckRegistrationPageProps> = ({ on
       {/* Cancel Confirmation Modal */}
       <ConfirmationModal
         isOpen={isCancelModalOpen}
-        title="Deseja realmente cancelar sua inscrição?"
-        message="Ao cancelar sua inscrição, sua vaga será liberada imediatamente para outro participante. Esta ação é definitiva e não poderá ser desfeita."
-        confirmText="Sim, Cancelar Inscrição"
-        cancelText="Voltar"
+        onCancel={() => setIsCancelModalOpen(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancelar Inscrição?"
+        message="Tem certeza que deseja cancelar sua inscrição no evento? Esta ação liberará sua vaga para outro jovem e cancelará seu código de credenciamento."
+        confirmText="Sim, Cancelar Minha Inscrição"
+        cancelText="Voltar e Manter Vaga"
         isDanger={true}
         isLoading={cancelling}
-        onConfirm={handleConfirmCancel}
-        onCancel={() => setIsCancelModalOpen(false)}
       />
 
-      {/* Certificate & Mini Badge Modal */}
+      {/* Certificate / Badge Full Modal */}
       {registration && (
         <CertificateModal
           isOpen={isCertModalOpen}
           onClose={() => setIsCertModalOpen(false)}
           registration={registration}
           event={event}
-          certificateConfig={event?.certificateConfig}
           defaultView={certModalView}
         />
       )}
