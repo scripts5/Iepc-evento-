@@ -21,6 +21,7 @@ import { AdminSettingsPage } from './pages/AdminSettingsPage.tsx';
 import { AdminUsersPage } from './pages/AdminUsersPage.tsx';
 import { AdminCertificatesPage } from './pages/AdminCertificatesPage.tsx';
 import { AdminBadgesPage } from './pages/AdminBadgesPage.tsx';
+import { AdminPeopleDirectoryPage } from './pages/AdminPeopleDirectoryPage.tsx';
 import { Registration } from './types/index.ts';
 
 function AppContent() {
@@ -82,7 +83,9 @@ function AppContent() {
   if (isAdminRoute && isAuthenticated) {
     let adminComponent = <AdminDashboardPage onNavigate={navigate} />;
 
-    if (currentPath === '/admin/inscritos') {
+    if (currentPath === '/admin/pessoas') {
+      adminComponent = <AdminPeopleDirectoryPage />;
+    } else if (currentPath === '/admin/inscritos') {
       adminComponent = <AdminRegistrationsPage />;
     } else if (currentPath === '/admin/crachas') {
       adminComponent = <AdminBadgesPage />;

@@ -141,7 +141,13 @@ export interface DashboardStats {
   presenceRate: number;
   capacityProgress: number;
   maxCapacity: number;
-  registrationsOverTime: { date: string; count: number }[];
+  registrationsOverTime: {
+    date: string;
+    label?: string;
+    dayOfWeek?: string;
+    fullDate?: string;
+    count: number;
+  }[];
   byTicketType: { name: string; count: number }[];
   byStatus: { status: string; count: number }[];
   byDenomination?: { name: string; count: number }[];

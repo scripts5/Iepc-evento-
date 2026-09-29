@@ -985,6 +985,7 @@ async function startServer() {
 
   // Dashboard Statistics
   const handleGetStats = (_req: Request, res: Response) => {
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const regs = db.registrations;
     const total = regs.length;
     const confirmed = regs.filter(r => r.status === 'Confirmado').length;
@@ -1025,8 +1026,16 @@ async function startServer() {
     });
 
     const registrationsOverTime = Array.from(datesMap.entries()).map(([date, count]) => {
-      const [_, month, day] = date.split('-');
-      return { date: `${day}/${month}`, count };
+      const parts = date.split('-');
+      const dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const dayOfWeek = dayNames[dObj.getDay()] || '';
+      return {
+        date: `${parts[2]}/${parts[1]}`,
+        label: `${parts[2]}/${parts[1]} (${dayOfWeek})`,
+        dayOfWeek,
+        fullDate: date,
+        count,
+      };
     });
 
     // Breakdown by Ticket Type
@@ -1067,7 +1076,6 @@ async function startServer() {
     ];
 
     // Complete Daily Breakdown: Inscritos vs Check-ins realizados no dia (todos os dias sem tirar ou substituir nenhum)
-    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const allDateSet = new Set<string>();
     regs.forEach(r => {
       if (r.createdAt) {

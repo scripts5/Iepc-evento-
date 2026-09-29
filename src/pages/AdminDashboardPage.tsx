@@ -33,6 +33,7 @@ import { useEvent } from '../context/EventContext.tsx';
 import { StatusBadge } from '../components/common/Badge.tsx';
 import { AdminDataVisualization } from '../components/admin/AdminDataVisualization.tsx';
 import { DailyAttendanceComparisonCard } from '../components/admin/DailyAttendanceComparisonCard.tsx';
+import { SevenDayRegistrationsBarChart } from '../components/admin/SevenDayRegistrationsBarChart.tsx';
 
 interface AdminDashboardPageProps {
   onNavigate: (path: string) => void;
@@ -232,43 +233,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Registration Trend Chart */}
-        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-indigo-600" />
-                Inscrições nos Últimos 7 Dias
-              </h3>
-              <p className="text-xs text-slate-500">Volume diário de novos participantes inscritos</p>
-            </div>
-          </div>
-
-          <div className="h-64 w-full pt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.registrationsOverTime}>
-                <defs>
-                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderRadius: '12px',
-                    color: '#fff',
-                    border: 'none',
-                    fontSize: '12px',
-                  }}
-                />
-                <Area type="monotone" dataKey="count" name="Inscrições" stroke="#4f46e5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCount)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        {/* Registration Daily Count Bar Chart (Last 7 Days) */}
+        <div className="lg:col-span-8">
+          <SevenDayRegistrationsBarChart data={stats.registrationsOverTime} />
         </div>
 
         {/* Breakdown by Category Bar Chart */}

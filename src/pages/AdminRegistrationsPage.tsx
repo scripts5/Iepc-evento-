@@ -238,6 +238,11 @@ export const AdminRegistrationsPage: React.FC = () => {
             </button>
           </div>
 
+          <div className="bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Vagas Ocupadas: {totalItems} de {event?.maxCapacity || 600}</span>
+          </div>
+
           <button
             type="button"
             onClick={handleExportCsv}

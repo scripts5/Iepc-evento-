@@ -46,7 +46,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPath, onNavigat
 
   const navItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Lista de Inscritos', path: '/admin/inscritos', icon: Users },
+    { label: 'Todas as Pessoas', path: '/admin/pessoas', icon: Users },
+    { label: 'Lista de Inscritos', path: '/admin/inscritos', icon: FileBarChart },
     { label: 'Crachás de Identificação', path: '/admin/crachas', icon: CreditCard },
     { label: 'Check-in (Credenciamento)', path: '/admin/checkin', icon: QrCode },
     { label: 'Certificados Digitais', path: '/admin/certificados', icon: Award },
