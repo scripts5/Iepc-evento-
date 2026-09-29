@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import QRCode from 'qrcode';
 import { createServer as createViteServer } from 'vite';
 import { sendRegistrationEmail, getEmailDeliveryLogs } from './src/server/mailer.ts';
+import { syncRegistrationToSupabase } from './src/lib/supabase.ts';
 import {
   EventConfig,
   Registration,
@@ -571,6 +572,11 @@ async function startServer() {
         console.warn('Erro não-bloqueante no envio de e-mail:', mailErr);
       });
 
+      // Synchronize to Supabase in background
+      syncRegistrationToSupabase(newRegistration).catch(supaErr => {
+        console.warn('Erro não-bloqueante no sync Supabase:', supaErr);
+      });
+
       res.status(201).json({
         message: 'Inscrição realizada e confirmada com sucesso!',
         registration: {
@@ -1060,6 +1066,54 @@ async function startServer() {
       { status: 'Cancelado', count: cancelled },
     ];
 
+    // Complete Daily Breakdown: Inscritos vs Check-ins realizados no dia (todos os dias sem tirar ou substituir nenhum)
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const allDateSet = new Set<string>();
+    regs.forEach(r => {
+      if (r.createdAt) {
+        const d = r.createdAt.split('T')[0];
+        if (d && d.length === 10) allDateSet.add(d);
+      }
+      if (r.checkedInAt) {
+        const d = r.checkedInAt.split('T')[0];
+        if (d && d.length === 10) allDateSet.add(d);
+      }
+    });
+
+    // Ensure at least the last 14 days up to today are present in chronological sequence
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      allDateSet.add(d.toISOString().split('T')[0]);
+    }
+
+    const sortedDates = Array.from(allDateSet).sort();
+    let accumInscritos = 0;
+    let accumCheckins = 0;
+
+    const dailyComparison = sortedDates.map(dayStr => {
+      const parts = dayStr.split('-');
+      const dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      const dayOfWeek = dayNames[dObj.getDay()] || '';
+      const formattedDate = `${parts[2]}/${parts[1]}`;
+
+      const inscritosNoDia = regs.filter(r => r.status !== 'Cancelado' && r.createdAt && r.createdAt.startsWith(dayStr)).length;
+      const checkinsNoDia = regs.filter(r => r.checkedInAt && r.checkedInAt.startsWith(dayStr)).length;
+
+      accumInscritos += inscritosNoDia;
+      accumCheckins += checkinsNoDia;
+
+      return {
+        date: formattedDate,
+        fullDate: dayStr,
+        dayOfWeek,
+        inscritos: inscritosNoDia,
+        checkins: checkinsNoDia,
+        acumuladoInscritos: accumInscritos,
+        acumuladoCheckins: accumCheckins,
+      };
+    });
+
     const stats: DashboardStats = {
       totalRegistrations: total,
       todayRegistrations: todayCount,
@@ -1073,6 +1127,7 @@ async function startServer() {
       byTicketType,
       byStatus,
       byDenomination,
+      dailyComparison,
     };
 
     res.json(stats);
@@ -1320,6 +1375,11 @@ async function startServer() {
       db.registrations[matchIndex] = participant;
       saveDatabase(db);
 
+      // Synchronize check-in status to Supabase
+      syncRegistrationToSupabase(participant).catch(supaErr => {
+        console.warn('Erro não-bloqueante no sync Supabase checkin:', supaErr);
+      });
+
       res.json({
         success: true,
         alreadyCheckedIn: false,
@@ -1397,6 +1457,25 @@ async function startServer() {
   };
   app.put('/api/admin/certificate/template', requireAuth, requireAdminRole, handleUpdateCertTemplate);
   app.post('/api/admin/certificate/template', requireAuth, requireAdminRole, handleUpdateCertTemplate);
+
+  // Sync All Registrations to Supabase
+  app.post('/api/admin/supabase/sync-all', async (_req: Request, res: Response) => {
+    try {
+      const results = await Promise.allSettled(
+        db.registrations.map(r => syncRegistrationToSupabase(r))
+      );
+      const successful = results.filter(
+        r => r.status === 'fulfilled' && (r.value as any)?.success
+      ).length;
+      res.json({
+        total: db.registrations.length,
+        synced: successful,
+        message: `${successful} de ${db.registrations.length} inscrições sincronizadas com o Supabase.`,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'Erro ao sincronizar com Supabase: ' + err.message });
+    }
+  });
 
   // Export Attendees to CSV (with UTF-8 BOM for Microsoft Excel compatibility)
   app.get('/api/admin/export/csv', requireAuth, (req: AuthenticatedRequest, res: Response) => {

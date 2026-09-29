@@ -32,6 +32,7 @@ import { useToast } from '../context/ToastContext.tsx';
 import { useEvent } from '../context/EventContext.tsx';
 import { StatusBadge } from '../components/common/Badge.tsx';
 import { AdminDataVisualization } from '../components/admin/AdminDataVisualization.tsx';
+import { DailyAttendanceComparisonCard } from '../components/admin/DailyAttendanceComparisonCard.tsx';
 
 interface AdminDashboardPageProps {
   onNavigate: (path: string) => void;
@@ -221,6 +222,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({ onNaviga
 
       {/* Recharts Data Visualization Component: Total Registrations, Check-in Rate, Denomination Breakdown */}
       <AdminDataVisualization stats={stats} />
+
+      {/* New Recharts Card: Total de Inscritos vs. Check-ins por Dia (Todos os Dias) */}
+      <DailyAttendanceComparisonCard
+        data={stats.dailyComparison || []}
+        totalRegistrations={stats.totalRegistrations}
+        totalCheckins={stats.presentRegistrations}
+      />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

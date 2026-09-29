@@ -51,7 +51,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     city: '',
     state: 'SP',
     organization: '',
-    ticketType: 'Membro IEPC',
+    ticketType: '',
     notes: '',
     termsAccepted: false,
   });
@@ -125,7 +125,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     const errs: Record<string, string> = {};
 
     if (!formData.ticketType || !formData.ticketType.trim()) {
-      errs.ticketType = 'Selecione ou informe sua categoria/denominação.';
+      errs.ticketType = 'Por favor, escreva qual é a sua denominação ou igreja.';
     }
 
     if (!formData.termsAccepted) {
@@ -487,56 +487,54 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
             onSubmit={handleNextStep}
             className="space-y-6"
           >
-            {/* Ticket / Denomination Type */}
+            {/* Denomination / Church input box */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                Categoria de Participação / Denominação *
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {activeEvent.ticketTypes.map((t) => {
-                  const isSelected = formData.ticketType === t.name;
-                  return (
-                    <div
-                      key={t.id}
-                      onClick={() => setFormData({ ...formData, ticketType: t.name })}
-                      className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                        isSelected
-                          ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20 shadow-xs'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-sm font-bold text-slate-900">{t.name}</span>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />}
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t.description}</p>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-2">
-                        100% Gratuito
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-              {errors.ticketType && <p className="text-xs text-rose-600 font-medium">{errors.ticketType}</p>}
-            </div>
-
-            {/* Congregation / Church Name */}
-            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Congregação / Igreja de Origem
+                  Denominação / Igreja que congrega *
                 </label>
-                <span className="text-[10px] font-semibold text-slate-400 uppercase">Opcional</span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  100% Gratuito
+                </span>
               </div>
               <div className="relative">
                 <input
                   type="text"
-                  value={formData.organization}
-                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                  placeholder="Ex: Templo Sede IEPC, Convidado de outra congregação..."
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  value={formData.ticketType}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, ticketType: val, organization: val });
+                    if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
+                  }}
+                  placeholder="Escreva qual é a sua denominação ou congregação (ex: IEPC, Batista, Assembleia de Deus, Visitante...)"
+                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
+                    errors.ticketType ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
+                  } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all bg-white`}
                 />
                 <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+              </div>
+              {errors.ticketType && <p className="text-xs text-rose-600 font-medium">{errors.ticketType}</p>}
+
+              {/* Sugestões rápidas para facilitar o preenchimento com 1 clique */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[11px] text-slate-400 font-medium">Exemplos rápidos:</span>
+                {['IEPC (Templo Sede)', 'IEPC (Congregação)', 'Assembleia de Deus', 'Batista', 'Presbiteriana', 'Visitante'].map((sug) => (
+                  <button
+                    key={sug}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, ticketType: sug, organization: sug });
+                      if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
+                    }}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                      formData.ticketType === sug
+                        ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-semibold'
+                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {sug}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -660,18 +658,11 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
               </div>
 
               <div className="p-4 flex items-center justify-between">
-                <span className="text-slate-500">Categoria:</span>
+                <span className="text-slate-500">Denominação / Igreja:</span>
                 <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full text-xs">
-                  {formData.ticketType}
+                  {formData.ticketType || 'IEPC'}
                 </span>
               </div>
-
-              {formData.organization && (
-                <div className="p-4 flex items-center justify-between">
-                  <span className="text-slate-500">Congregação / Igreja:</span>
-                  <span className="text-slate-800">{formData.organization}</span>
-                </div>
-              )}
 
               <div className="p-4 flex items-center justify-between">
                 <span className="text-slate-500">Status após envio:</span>

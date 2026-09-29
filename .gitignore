@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+data/supabase-secrets.json
+firebase-applet-config.json

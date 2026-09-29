@@ -122,6 +122,16 @@ export interface AuthUser {
   role: UserRole;
 }
 
+export interface DailyRegistrationCheckinStat {
+  date: string;
+  fullDate: string;
+  dayOfWeek: string;
+  inscritos: number;
+  checkins: number;
+  acumuladoInscritos: number;
+  acumuladoCheckins: number;
+}
+
 export interface DashboardStats {
   totalRegistrations: number;
   todayRegistrations: number;
@@ -135,6 +145,7 @@ export interface DashboardStats {
   byTicketType: { name: string; count: number }[];
   byStatus: { status: string; count: number }[];
   byDenomination?: { name: string; count: number }[];
+  dailyComparison?: DailyRegistrationCheckinStat[];
 }
 
 export interface CheckinResult {
