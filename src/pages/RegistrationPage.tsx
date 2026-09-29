@@ -125,7 +125,7 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
     const errs: Record<string, string> = {};
 
     if (!formData.ticketType || !formData.ticketType.trim()) {
-      errs.ticketType = 'Por favor, escreva qual é a sua denominação ou igreja.';
+      errs.ticketType = 'Por favor, selecione qual é a sua denominação ou igreja.';
     }
 
     if (!formData.termsAccepted) {
@@ -487,55 +487,101 @@ export const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigate, 
             onSubmit={handleNextStep}
             className="space-y-6"
           >
-            {/* Denomination / Church input box */}
-            <div className="space-y-2">
+            {/* Denomination / Church selection (1-Click, no typing needed) */}
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Denominação / Igreja que congrega *
-                </label>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Selecione sua Denominação / Igreja *
+                  </label>
+                  <p className="text-xs text-slate-500">
+                    Basta dar 1 clique na sua igreja para selecionar (não precisa escrever nada)
+                  </p>
+                </div>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                   100% Gratuito
                 </span>
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.ticketType}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setFormData({ ...formData, ticketType: val, organization: val });
-                    if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
-                  }}
-                  placeholder="Escreva qual é a sua denominação ou congregação (ex: IEPC, Batista, Assembleia de Deus, Visitante...)"
-                  className={`w-full pl-10 pr-4 py-3 text-sm rounded-xl border ${
-                    errors.ticketType ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
-                  } outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all bg-white`}
-                />
-                <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+
+              {/* Cards Selecionáveis com 1 Toque */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {[
+                  {
+                    name: 'IEPC (Templo Sede)',
+                    subtitle: 'Membro ou frequenta o Templo Sede',
+                    icon: '⛪',
+                  },
+                  {
+                    name: 'IEPC (Congregação)',
+                    subtitle: 'Congregação da IEPC',
+                    icon: '🏛️',
+                  },
+                  {
+                    name: 'Convidado / Amigo Visitante',
+                    subtitle: 'Visitante especial para o evento',
+                    icon: '🤝',
+                  },
+                  {
+                    name: 'Assembleia de Deus',
+                    subtitle: 'Membro da Assembleia de Deus',
+                    icon: '📖',
+                  },
+                  {
+                    name: 'Igreja Batista',
+                    subtitle: 'Membro da Igreja Batista',
+                    icon: '🕊️',
+                  },
+                  {
+                    name: 'Outra Igreja Evangélica',
+                    subtitle: 'Presbiteriana, Quadrangular ou outra',
+                    icon: '✨',
+                  },
+                ].map((item) => {
+                  const isSelected = formData.ticketType === item.name;
+                  return (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          ticketType: item.name,
+                          organization: item.name,
+                        });
+                        if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
+                      }}
+                      className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50/70 shadow-xs ring-2 ring-indigo-500/20'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-xl shrink-0">{item.icon}</span>
+                        <div className="min-w-0">
+                          <p className={`text-xs font-bold truncate ${isSelected ? 'text-indigo-950' : 'text-slate-800'}`}>
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] text-slate-500 truncate">
+                            {item.subtitle}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected
+                            ? 'border-indigo-600 bg-indigo-600 text-white'
+                            : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
               {errors.ticketType && <p className="text-xs text-rose-600 font-medium">{errors.ticketType}</p>}
-
-              {/* Sugestões rápidas para facilitar o preenchimento com 1 clique */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-[11px] text-slate-400 font-medium">Exemplos rápidos:</span>
-                {['IEPC (Templo Sede)', 'IEPC (Congregação)', 'Assembleia de Deus', 'Batista', 'Presbiteriana', 'Visitante'].map((sug) => (
-                  <button
-                    key={sug}
-                    type="button"
-                    onClick={() => {
-                      setFormData({ ...formData, ticketType: sug, organization: sug });
-                      if (errors.ticketType) setErrors({ ...errors, ticketType: '' });
-                    }}
-                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                      formData.ticketType === sug
-                        ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-semibold'
-                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
-                    }`}
-                  >
-                    {sug}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Notes / Special Requests */}
